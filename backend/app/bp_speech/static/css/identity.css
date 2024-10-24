@@ -1,0 +1,66 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4; /* Light gray background for contrast */
+    margin: 0;
+    padding: 0;
+}
+
+.index__header {
+    background-color: #355a80; /* Dark blue header */
+    color: white;
+    text-align: center;
+    padding: 1rem;
+}
+
+.otp-form-container {
+    width: 100%;
+    max-width: 350px; /* Adjusted width for a better fit */
+    margin: 2rem auto;
+    padding: 1.5rem; /* Adjusted padding for a tighter look */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    border-radius: 8px; /* Rounded corners */
+    background-color: #ffffff; /* White background for the form */
+}
+
+.otp-form-container form {
+    display: flex;
+    flex-direction: column;
+}
+
+.otp-form-container label {
+    margin-bottom: 0.5rem;
+}
+
+.otp-form-container input[type="text"],
+.otp-form-container input[type="submit"] {
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 1rem; /* Larger font size for readability */
+}
+
+.otp-form-container input[type="text"] {
+    margin-bottom: 1rem;
+    border: 1px solid #ddd; /* Light gray border */
+}
+
+.otp-form-container input[type="submit"] {
+    cursor: pointer;
+    border: none;
+    background-color: #5cb85c; /* Green button for a call to action */
+    color: white;
+    transition: background-color 0.3s ease; /* Transition for button hover effect */
+}
+
+.otp-form-container input[type="submit"]:hover {
+    background-color: #4cae4c; /* Darker green on hover for interaction feedback */
+}
+.company-logo-container {
+    text-align: left; /* Align to the left margin */
+    padding-left: 20px; /* Add padding to ensure it does not stick to the very edge */
+    margin-bottom: 1rem; /* Space below the logo */
+}
+
+.company-logo {
+    width: 120px; /* Adjusted to a smaller size */
+    height: auto; /* Maintain the aspect ratio */
+}

@@ -1,0 +1,12 @@
+###
+
+# curl https://api.openai.com/v1/vector_stores
+#  -H "Authorization: Bearer $OPENAI_API_KEY"
+#  -H "OpenAI-Organization: $ORGANIZATION_ID"
+#  -H "OpenAI-Beta: assistants=v1"
+GET https://api.openai.com/v1/vector_stores
+Authorization: Bearer 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
+OpenAI-Beta: assistants=v1
+
+
+
