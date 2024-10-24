@@ -1,0 +1,22 @@
+
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flask_aether_core_desk
+    restart: always
+    environment:
+      - FLASK_CONFIG=production
+      - DATABASE_URL=sqlite:///data/db.sqlite3
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data:/data                # Mount the local data directory
+    networks:
+      - aether_network
+
+networks:
+  aether_network:
+    driver: bridge

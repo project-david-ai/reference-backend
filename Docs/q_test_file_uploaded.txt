@@ -1,0 +1,15 @@
+What’s your name?
+
+Where are you from?
+
+How do you feel?
+
+
+Some General Prompts
+
+1. Please show me an example of a python function
+2. Please show me an example of a c++ function
+3. Please show me an example of a Erlang function
+4. Write me a poem
+5. Show me a Phd level algebra equation
+6. Give me a list of the top 10 Bruce Springsteen songs

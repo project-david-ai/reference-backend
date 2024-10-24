@@ -1,0 +1,138 @@
+{
+  "codes": [
+
+    "DN8VIXPIJO",
+    "QEQEGHRB52",
+    "4U3RTH89N2",
+    "YV12YB5IEJ",
+    "LY4U9BZ18X",
+
+
+     //Millicent
+
+     H2EBYR5U79
+
+     881T8GAX6D
+
+     RYK91RKJ7P
+
+     CVLIFWGXO5
+
+     T2O6SMBIRD
+
+
+
+    //Dhirj Angris
+
+     CDPO5MVZN1
+     4EAP0OB4CI
+     DOQACGAABD
+     1O9YX5HD02
+
+    // moses
+    "13GABTF5IF",
+    "0ZYJ4Q7UVY",
+    "WXNC5CJBHG",
+    "QL2BYDRN1A",
+    "E7WDMROLLZ",
+
+    //Francis
+    "X7XNGFRCZJ",
+    "GTI5U39HMZ",
+    "CZBGPFQFFB",
+    "0U1AZM2K1U",
+    "5LAC1OQU3L",
+    "LAOV3B1472",
+    "XH9SUX7KK0",
+    "QI7D67NRCW",
+    "J55X2USNLV",
+    "0FPHSF058R",
+
+
+
+    //Shah
+    "DBV42KOHUA",
+    "SXWGHH3MGY",
+    "RUMY16SQ0W",
+    "44IDS8RT5G",
+    "38FI2X5GJU",
+
+    //
+    "0LDCD70ELN",
+    "Q0VJU9DTP3",
+    "VDTKR2P8C0",
+    "S2WQS7XIR7",
+    "IJQ3BDRK11",
+
+
+    //Luke
+    "USIU8VPEWP",
+    "EY2ZN3SYR6",
+    "676I5C1IDA",
+    "3W4LLIF8HF",
+    "DRX36G29V2",
+
+    //More Marian
+    "6738F24POC",
+    "SZ8OQVBG90",
+    "4DV0NAR1CI",
+    "9NO059ISZO",
+    "1SMD2J1QRJ",
+    "J7CXD385WD",
+    "CXDARHERKE",
+    "VK8EZAM7CS",
+    "1Y1VW59WJZ",
+    "65UXUNGJDQ",
+
+    //Terry
+    "FWO1XNYH90",
+    "6KIXDDHQ9Y",
+    "000WH0959F",
+    "2UJXFXHSLR",
+    "9QWS2WHL38",
+    "BP7ZM7H0UY",
+    "H3ZYVBPVTG",
+    "ZAIHE4KWWH",
+    "EW9GI5NO6K",
+    "6UVM4S4A7I",
+
+
+    "4HY3TEGCAY",
+    "36K3DNAGF2",
+    "T7QPD7SXFR",
+    "AZOO9J5WHF",
+    "LXZRY1YG8D",
+    "6OUC94LGTL",
+    "M97DVU7SE9",
+    "YVILTIEV8J",
+    "XSP6M1B13U",
+    "QXYMZFPO37",
+    "03RIKOF82C",
+    "IBWUG4Z2UD",
+    "PXC23ZZBOR",
+    "SM52S9A9VR",
+    "FCUPOFSJVW",
+    "3ZNJ9N0827",
+    "15UQLEL349",
+    "IPRR7P9G22",
+    "9UHBGOQBR6",
+    "65W1RSUYT5",
+    "QGE20BG3NO",
+    "3W6TMUC70Q",
+    "VNZRBOKME7",
+    "D9TNECSO2Y",
+    "Z2QG17WS9A",
+    "J3PYKI5KY8",
+    "XFLZWRS6GT",
+    "HB48XGRU19",
+    "2PCHHHDB29",
+    "H1YWRH23AT",
+    "6YWEGYTCBQ",
+    "0VQV3M7K7J",
+    "VA5N07KKO9",
+    "EAMNNUSSJ8",
+    "FAFGVDC12A",
+    "HI742OM4G3"
+  ],
+  "message": "100 invitation codes created successfully."
+}
