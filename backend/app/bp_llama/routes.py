@@ -51,7 +51,7 @@ def process_messages():
 
 def conversation(thread_id, user_message, user_id, selected_model):
 
-    assistant = "asst_N5V3kp9XOXFmAjYHrPBwKO"
+    assistant = "asst_NEyUOqgjpLutD581F2o3EU"
 
     the_message = client.message_service.create_message(thread_id=thread_id,
                                           content=user_message,
@@ -61,14 +61,14 @@ def conversation(thread_id, user_message, user_id, selected_model):
     message_id = the_message['id']
 
     run = client.run_service.create_run(thread_id=thread_id, assistant_id=assistant)
-    run_id = run['id']
+    run_id = run.id
 
     def generate_chunks():
         try:
             # Send the run_id as the first chunk
             yield f"data: {json.dumps({'run_id': run_id})}\n\n"
 
-            for chunk in client.runner.process_conversation(thread_id=thread_id, message_id=message_id, run_id=run_id, assistant_id=assistant, model='llama3.1'):
+            for chunk in client.runner.process_conversation(thread_id=thread_id, message_id=message_id, run_id=run.id, assistant_id=assistant, model='llama3.1'):
                 logging_utility.debug("Received chunk: %s", chunk)
 
                 # Wrap the entire chunk in a JSON object to ensure it's valid

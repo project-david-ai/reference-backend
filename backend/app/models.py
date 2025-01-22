@@ -101,7 +101,7 @@ def create_default_assistant(user_id):
         if not assistant_record:
             assistant = client.assistant_service.create_assistant(
                 name='Mathy',
-                user_id=user_id,
+                #user_id=user_id,
                 description='My helpful maths tutor',
                 model='llama3.1',
                 instructions='Be as kind, intelligent, and helpful',
