@@ -2,13 +2,15 @@
 import json
 from flask import jsonify, request, Response, stream_with_context
 from flask_jwt_extended import jwt_required
-import entities_api
+from entities_api import OllamaClient, ClientAssistantService, LocalInference
 from backend.app.services.logging_service.logger import LoggingUtility
+
+
 from . import bp_llama
 
-
 logging_utility = LoggingUtility()
-client = entities_api.OllamaClient()
+
+client = OllamaClient()
 
 
 @bp_llama.route('/api/messages/process', methods=['POST'])
@@ -64,11 +66,19 @@ def conversation(thread_id, user_message, user_id, selected_model):
     run_id = run.id
 
     def generate_chunks():
+
+        inference = LocalInference()
+
         try:
             # Send the run_id as the first chunk
             yield f"data: {json.dumps({'run_id': run_id})}\n\n"
 
-            for chunk in client.runner.process_conversation(thread_id=thread_id, message_id=message_id, run_id=run.id, assistant_id=assistant, model='llama3.1'):
+            for chunk in inference.process_conversation(thread_id=thread_id,
+                                                        message_id=message_id,
+                                                        run_id=run.id,
+                                                        assistant_id=assistant,
+                                                        model='llama3.1'):
+
                 logging_utility.debug("Received chunk: %s", chunk)
 
                 # Wrap the entire chunk in a JSON object to ensure it's valid
