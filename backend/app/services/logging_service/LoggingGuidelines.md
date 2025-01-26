@@ -9,7 +9,7 @@ Objectives
     Ensure sensitive information is not logged inadvertently.
     Enable effective analysis and debugging by logging relevant information.
 
-Guidelines
+Guidelinesa
 
     Use the LoggingUtility Class Use the LoggingUtility class from the backend.app.services.logging_service.logger module for all logging operations. This class encapsulates the logging functionality and ensures consistent configuration across the application.
     Replace Print Statements Replace all print statements with appropriate logging statements using the LoggingUtility instance (logging_utility).
