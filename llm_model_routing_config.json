@@ -3,30 +3,50 @@
     {
       "inference_point": "local",
       "model": "llama3.1",
-      "handler": "LocalInference.llama",
+      "handler": "LocalInference.get_llama",
       "priority": 1
     },
     {
       "inference_point": "local",
       "model": "deepseek-r1:8b",
-      "handler": "LocalInference.deep_seekr1",
+      "handler": "LocalInference.get_deepseek_r1",
+      "priority": 1
+    },
+    {
+      "inference_point": "local",
+      "model": "deepseek-chat",
+      "handler": "LocalInference.get_deepseek_v3",
       "priority": 1
     },
     {
       "inference_point": "cloud",
       "provider": "DeepSeek",
-      "handler": "CloudInference.deep_seekr1",
+      "model": "deepseek-chat",
+      "handler": "CloudInference.get_deepseek_v3",
+      "priority": 1
+    },
+    {
+      "inference_point": "cloud",
+      "provider": "DeepSeek",
+      "handler": "CloudInference.get_deepseek_r1",
       "priority": 1
     },
     {
       "inference_point": "cloud",
       "provider": "Llama",
-      "handler": "CloudInference.llama_cloud",
+      "handler": "CloudInference.get_llama_cloud",
       "priority": 1
     },
     {
       "inference_point": "cloud",
-      "handler": "CloudInference.deep_seekr1",
+      "provider": "Groq",
+      "model": "mixtral-8x7b-32768",
+      "handler": "CloudInference.get_groq_deepseek",
+      "priority": 1
+    },
+    {
+      "inference_point": "cloud",
+      "handler": "CloudInference.get_deepseek_r1",
       "priority": 0,
       "is_fallback": true
     }
