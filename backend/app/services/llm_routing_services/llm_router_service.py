@@ -1,6 +1,6 @@
 # backend/app/services/llm_routing_services/llm_router_service.py
 import json
-from pathlib import Path
+
 from backend.app.services.logging_service.logger import LoggingUtility
 
 logging_utility = LoggingUtility()
@@ -28,7 +28,7 @@ class LlmRouter:
     Example Usage:
         router = LlmRouter('routing_config.json')
         handler = router.resolve_handler(inference_point='cloud', provider='DeepSeek', model='deepseek-reasoner')
-        # handler = 'CloudInference.deep_seekr1'
+        # handler = 'CloudInference.deep_seek_r1'
 
     Potential for Expansion:
         1. Support for dynamic configuration updates (e.g., reloading the config file without restarting the app).

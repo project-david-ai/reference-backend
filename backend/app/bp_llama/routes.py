@@ -1,4 +1,6 @@
 import json
+import time
+import threading
 from flask import jsonify, request, Response, stream_with_context
 from flask_jwt_extended import jwt_required
 from entities_api import OllamaClient, ClientAssistantService, LocalInference, CloudInference
@@ -11,6 +13,68 @@ client = OllamaClient()
 
 # Initialize the LlmRouter with the path to the routing configuration file
 llm_router = LlmRouter('llm_model_routing_config.json')
+
+
+def monitor_run_status(run_id: str, run_service):
+    """
+    Continuously monitor the status of a run and handle specific statuses like 'action_required'.
+    """
+    while True:
+        try:
+            run = run_service.retrieve_run(run_id)
+            logging_utility.info(f"Run {run_id} status: {run.status}")
+
+            if run.status == "action_required":
+                logging_utility.info("Action required for run %s. Handling...", run_id)
+
+                # Fetch pending actions for the run
+                pending_actions = client.get_action_service.get_pending_actions(run_id=run_id)
+                logging_utility.info(f"Pending actions for run {run_id}: {pending_actions}")
+
+                # Perform actions for 'action_required' status
+                handle_action_required(run, pending_actions)
+                break  # Exit the loop after handling
+
+            elif run.status in ["completed", "failed", "cancelled"]:
+                logging_utility.info("Run %s has ended with status: %s", run_id, run.status)
+                break  # Exit the loop if the run has ended
+
+            # Wait before polling again
+            time.sleep(2)  # Adjust the polling interval as needed
+
+        except Exception as e:
+            logging_utility.error(f"Error monitoring run {run_id}: {str(e)}")
+            break
+
+
+def handle_action_required(run, pending_actions):
+    """
+    Handle the 'action_required' status for a run by processing pending actions.
+    """
+    logging_utility.info(f"Handling action required for run {run.id}")
+
+    if not pending_actions:
+        logging_utility.info("No pending actions found for run %s", run.id)
+        return
+
+    for action in pending_actions:
+        action_id = action.get("action_id")
+        tool_name = action.get("tool_name")
+        function_arguments = action.get("function_arguments")
+        run_id = action.get("run_id")
+
+        logging_utility.info(
+            f"Processing pending action: action_id={action_id}, tool_name={tool_name}, "
+            f"function_arguments={function_arguments}, run_id={run_id}"
+        )
+
+        # Add your logic here to handle the pending action
+        # For example, trigger a tool, update the action status, or notify the user
+        # Example:
+        # result = trigger_tool(tool_name, function_arguments)
+        # client.get_action_service.update_action(action_id, status="completed", result=result)
+        # notify_user(run.thread_id, f"Action {action_id} completed for tool {tool_name}.")
+
 
 @bp_llama.route('/api/messages/process', methods=['POST'])
 @jwt_required()
@@ -53,6 +117,7 @@ def process_messages():
             raise ValueError("Message content is missing")
 
         logging_utility.info("Processing conversation for thread ID: %s", thread_id)
+
         response = conversation(
             thread_id=thread_id,
             user_message=user_message,
@@ -72,21 +137,6 @@ def process_messages():
 
 
 def conversation(thread_id, user_message, user_id, selected_model, inference_point, provider):
-    """
-    Handle the conversation logic, including message creation, run initialization,
-    and streaming the response using the appropriate LLM handler.
-
-    Args:
-        thread_id (str): The ID of the conversation thread.
-        user_message (str): The message content from the user.
-        user_id (str): The ID of the user.
-        selected_model (str): The selected LLM model.
-        inference_point (str): The type of inference ('local' or 'cloud').
-        provider (str): The provider name (e.g., 'DeepSeek', 'Llama').
-
-    Returns:
-        Response: A streaming response with the conversation chunks.
-    """
     assistant = "asst_NEyUOqgjpLutD581F2o3EU"
 
     # Log the selected model, inference type, and provider at the start of the conversation
@@ -107,6 +157,13 @@ def conversation(thread_id, user_message, user_id, selected_model, inference_poi
     run = client.run_service.create_run(thread_id=thread_id, assistant_id=assistant)
     run_id = run.id
 
+    # Start monitoring the run status in a separate thread
+    status_monitor_thread = threading.Thread(
+        target=monitor_run_status,
+        args=(run_id, client.run_service)
+    )
+    status_monitor_thread.start()
+
     def generate_chunks():
         try:
             # Resolve the appropriate handler using LlmRouter
@@ -121,15 +178,13 @@ def conversation(thread_id, user_message, user_id, selected_model, inference_poi
 
             # Get the processing method
             handler_instance = handler_class()
-            processing_method = getattr(handler_instance, method_name)
+            retrieval_method = getattr(handler_instance, method_name)
+            model_instance = retrieval_method()  # Get the actual model instance
 
             # Send the run_id as the first chunk
             yield f"data: {json.dumps({'run_id': run_id})}\n\n"
 
-            # Process conversation stream
-
             # Prepare arguments for process_conversation
-
             process_args = {
                 "thread_id": thread_id,
                 "message_id": message_id,
@@ -142,14 +197,10 @@ def conversation(thread_id, user_message, user_id, selected_model, inference_poi
             if selected_model == "deepseek-reasoner":
                 process_args["stream_reasoning"] = True
 
-            # Process conversation stream
-            for chunk in processing_method.process_conversation(**process_args):
+            # Process conversation stream using the actual instance
+            for chunk in model_instance.process_conversation(**process_args):
                 logging_utility.debug(f"Streaming chunk: {chunk}")
                 yield f"data: {json.dumps({'chunk': chunk})}\n\n"
-
-
-
-
 
             yield "data: [DONE]\n\n"
         except Exception as e:
