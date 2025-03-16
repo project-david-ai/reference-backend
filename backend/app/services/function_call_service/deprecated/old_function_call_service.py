@@ -1,4 +1,6 @@
 # backend/app/services/function_call_service.py
+import random
+
 import requests
 from backend.app.services.logging_service.logger import LoggingUtility
 from backend.app.services.api_service_external.api_public_access.api_uk_statistics.ons.api_uk_ons import OnsApiService
@@ -54,7 +56,9 @@ class FunctionCallService:
             "getRpkiHistory": self.handle_get_rpki_history,
             "getSearchcomplete": self.handle_get_searchcomplete,
             # User services
-            "getUserDetailsByFauxIdentity": self.handle_get_user_details_by_faux_identity
+            "getUserDetailsByFauxIdentity": self.handle_get_user_details_by_faux_identity,
+            #test
+            "get_flight_times": self.handle_get_get_flight_times
 
 
         }
@@ -65,6 +69,29 @@ class FunctionCallService:
             return "Error: Unsupported function"
 
         return self.function_handlers[function_name](arguments)
+
+    @staticmethod
+    def handle_get_get_flight_times(departure: str, arrival: str) ->dict:
+        """
+        Simulate flight times between two cities (airport codes).
+
+        Parameters:
+            departure (str): The departure city (airport code).
+            arrival (str): The arrival city (airport code).
+
+        Returns:
+            dict: A mock response with flight times and airports.
+        """
+        # Randomly generate flight time between 1 to 12 hours
+        flight_time = random.randint(1, 12)
+        flight_minutes = random.randint(0, 59)
+        flight_duration = f"{flight_time} hours {flight_minutes} minutes"
+
+        return {
+            "departure": departure,
+            "arrival": arrival,
+            "flight_time": flight_duration
+        }
 
     def handle_get_location_info(self, arguments):
         location = arguments["location"]
@@ -1140,6 +1167,8 @@ class FunctionCallService:
             response = "Faux identity not provided."
 
         return response
+
+
 
 
 

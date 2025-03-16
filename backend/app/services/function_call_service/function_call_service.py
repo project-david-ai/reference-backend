@@ -1,11 +1,15 @@
 # backend/app/services/function_call_service.py
-from backend.app.services.function_call_service.handlers.image_generator_handler import ImageGeneratorHandler
-from backend.app.services.function_call_service.handlers.location_handler import LocationHandler
+#from backend.app.services.function_call_service.handlers.image_generator_handler import ImageGeneratorHandler
+#from backend.app.services.function_call_service.handlers.location_handler import LocationHandler
+import json
+import random
+import time
+
 from backend.app.services.function_call_service.handlers.ons_data_handler import OnsDataHandler
 from backend.app.services.function_call_service.handlers.ripe_stat_handler import RipeStatHandler
-from backend.app.services.function_call_service.handlers.user_details_handler import UserDetailsHandler
-from backend.app.services.function_call_service.handlers.user_location_handler import UserLocationHandler
-from backend.app.services.function_call_service.handlers.google_geocoding_handler import GoogleGeocodingHandler
+#from backend.app.services.function_call_service.handlers.user_details_handler import UserDetailsHandler
+#from backend.app.services.function_call_service.handlers.user_location_handler import UserLocationHandler
+#from backend.app.services.function_call_service.handlers.google_geocoding_handler import GoogleGeocodingHandler
 
 from backend.app.services.logging_service.logger import LoggingUtility
 
@@ -14,17 +18,17 @@ logging_utility = LoggingUtility()
 
 class FunctionCallService:
     def __init__(self):
-        self.location_handler = LocationHandler()
-        self.image_generator_handler = ImageGeneratorHandler()
+        #self.location_handler = LocationHandler()
+        #self.image_generator_handler = ImageGeneratorHandler()
         self.ons_data_handler = OnsDataHandler()
         self.ripe_stat_handler = RipeStatHandler()
-        self.user_details_handler = UserDetailsHandler()
-        self.user_location_handler = UserLocationHandler()
-        self.google_geocoding_handler = GoogleGeocodingHandler()
+        #self.user_details_handler = UserDetailsHandler()
+        #self.user_location_handler = UserLocationHandler()
+        #self.google_geocoding_handler = GoogleGeocodingHandler()
 
         self.function_handlers = {
-            "getLocationInfo": self.location_handler.handle_get_location_info,
-            "generateImage": self.image_generator_handler.handle_generate_image,
+            #"getLocationInfo": self.location_handler.handle_get_location_info,
+            #"generateImage": self.image_generator_handler.handle_generate_image,
             "getOnsDataSets": self.ons_data_handler.handle_get_ons_datasets,
             "getOnsDatasetByEndpoint": self.ons_data_handler.handle_get_ons_dataset_by_endpoint,
             "getUkBusinessData": self.ons_data_handler.handle_get_uk_business_data,
@@ -65,11 +69,12 @@ class FunctionCallService:
             "getWhatsMyIp": self.ripe_stat_handler.handle_get_whats_my_ip,
             "getZonemasterOverview": self.ripe_stat_handler.handle_get_zonemaster_overview,
             "getZonemasterDetails": self.ripe_stat_handler.handle_get_zonemaster_details,
+            "get_flight_times": self.handle_get_get_flight_times,
             # User Services
-            "getUserDetailsByFauxIdentity": self.user_details_handler.handle_get_user_details_by_faux_identity,
-            "getUserLocations": self.user_location_handler.handle_get_user_locations,
-            "getCurrentLocationByGps": self.google_geocoding_handler.handle_get_current_location_by_gps,
-            "getPlacesNearByGps": self.google_geocoding_handler.handle_get_places_near_by_gps
+            #"getUserDetailsByFauxIdentity": self.user_details_handler.handle_get_user_details_by_faux_identity,
+            #"getUserLocations": self.user_location_handler.handle_get_user_locations,
+            #"getCurrentLocationByGps": self.google_geocoding_handler.handle_get_current_location_by_gps,
+            #"getPlacesNearByGps": self.google_geocoding_handler.handle_get_places_near_by_gps
         }
 
     def call_function(self, function_name, arguments):
@@ -78,3 +83,30 @@ class FunctionCallService:
             return "Error: Unsupported function"
 
         return self.function_handlers[function_name](arguments)
+
+    @staticmethod
+    def handle_get_get_flight_times(arguments):
+        """
+        Simulate flight times between two cities (airport codes).
+
+        Parameters:
+            departure (str): The departure city (airport code).
+            arrival (str): The arrival city (airport code).
+
+        Returns:
+            dict: A mock response with flight times and airports.
+        """
+
+        print(arguments)
+        #time.sleep(1000)
+
+        # Randomly generate flight time between 1 to 12 hours
+        flight_time = random.randint(1, 12)
+        flight_minutes = random.randint(0, 59)
+        flight_duration = f"{flight_time} hours {flight_minutes} minutes"
+
+        return {
+            "departure": "JFK",
+            "arrival": "LAX",
+            "flight_time": flight_duration
+        }
