@@ -1,6 +1,5 @@
 import json
 import asyncio
-import time
 
 from flask import jsonify, request, Response, stream_with_context
 from flask_jwt_extended import jwt_required
@@ -46,9 +45,8 @@ def process_messages():
         inference_point = data.get('inferencePoint')
         provider = data.get('provider')
 
-        provider ="Hyperbolic"
-
-
+        # Forcing provider to "Hyperbolic"
+        provider = "Hyperbolic"
 
         logging_utility.info(
             "Processing request: user_id=%s, thread_id=%s, model=%s, inference_point=%s, provider=%s",
@@ -105,15 +103,12 @@ def process_messages():
             asyncio.set_event_loop(loop)
             gen = async_generate_chunks()  # Async generator instance
             try:
-                async def iterate_gen():
-                    # Collect all chunks into a list.
-                    chunks = []
-                    async for item in gen:
-                        chunks.append(item)
-                    return chunks
-                all_chunks = loop.run_until_complete(iterate_gen())
-                for chunk in all_chunks:
-                    yield chunk
+                while True:
+                    try:
+                        chunk = loop.run_until_complete(gen.__anext__())
+                        yield chunk
+                    except StopAsyncIteration:
+                        break
             finally:
                 loop.close()
 
