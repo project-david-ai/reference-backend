@@ -3,24 +3,37 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 
-
 # Load environment variables
 gpt4_turbo_sentinel_drone_id = os.getenv("OPENAI_ASSISTANT_GPT4_TURBO_SENTINEL_DRONE")
 openai_api_key = os.getenv("OPENAI_API_KEY")
 TECH_SUPPORT = os.getenv("TECH_SUPPORT")
-
 
 def show_json(obj):
     """Prints JSON representation of an object."""
     json_str = json.dumps(obj, indent=4)
     print(json_str)
 
-
 class LoggingUtility:
+    _instance = None
+
+    def __new__(cls, app=None, enable_file_logging=False):
+        if cls._instance is None:
+            cls._instance = super(LoggingUtility, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+
     def __init__(self, app=None, enable_file_logging=False):
+        if self._initialized:
+            return
+        self._initialized = True
+
         self.app = app
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)  # Set base logging level to capture all messages
+
+        # Remove all existing handlers
+        for handler in self.logger.handlers[:]:
+            self.logger.removeHandler(handler)
 
         # Set up formatter
         self.formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -59,7 +72,8 @@ class LoggingUtility:
             )
             self.file_handler.setLevel(logging.INFO)
             self.file_handler.setFormatter(self.formatter)
-            self.logger.addHandler(self.file_handler)
+            if self.file_handler not in self.logger.handlers:
+                self.logger.addHandler(self.file_handler)
 
     def toggle_file_logging(self, enable=True):
         """Enable or disable logging to a file."""
@@ -107,7 +121,6 @@ class LoggingUtility:
         """Custom logic for critical logs (e.g., activate alert system)."""
         print("Intercepted Critical Log:")
         print(message % args)
-
 
 if __name__ == "__main__":
     error = "ValueError: OpenAI API key, GPT-4 Turbo Assistant ID, or GPT-3 Turbo Assistant ID is not defined. Please check your environment variables"

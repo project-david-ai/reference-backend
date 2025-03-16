@@ -1,6 +1,43 @@
 {
   "routes": [
     {
+      "inference_point": "cloud",
+      "provider": "Azure Foundry",
+      "model": "DeepSeek-R1-pancho",
+      "handler": "CloudInference.get_azure_deepseek_r1",
+      "priority": 1
+    },
+
+    {
+      "inference_point": "cloud",
+      "provider": "Groq",
+      "model": "deepseek-r1-distill-llama-70b",
+      "handler": "CloudInference.get_groq_deepseek",
+      "priority": 1
+    },
+
+    {
+      "inference_point": "cloud",
+      "provider": "DeepSeek",
+      "model": "deepseek-ai/deepseek-chat",
+      "handler": "CloudInference.get_deepseek_v3",
+      "priority": 1
+    },
+    {
+      "inference_point": "cloud",
+      "provider": "DeepSeek",
+      "model": "deepseek-ai/deepseek-reasoner",
+      "handler": "CloudInference.get_deepseek_r1",
+      "priority": 1
+    },
+
+    {
+      "inference_point": "cloud",
+      "provider": "Llama",
+      "handler": "CloudInference.get_llama_cloud",
+      "priority": 1
+    },
+    {
       "inference_point": "local",
       "model": "llama3.1",
       "handler": "LocalInference.get_llama",
@@ -12,43 +49,51 @@
       "handler": "LocalInference.get_deepseek_r1",
       "priority": 1
     },
+
     {
       "inference_point": "local",
       "model": "deepseek-chat",
       "handler": "LocalInference.get_deepseek_v3",
       "priority": 1
     },
+
+
     {
       "inference_point": "cloud",
-      "provider": "DeepSeek",
-      "model": "deepseek-chat",
-      "handler": "CloudInference.get_deepseek_v3",
+      "model": "hyperbolic/deepseek-ai/DeepSeek-R1",
+      "handler": "CloudInference.get_hyperbolic_r1",
       "priority": 1
     },
+
+     {
+      "inference_point": "cloud",
+      "model": "hyperbolic/deepseek-ai/DeepSeek-V3",
+      "handler": "CloudInference.get_hyperbolic_v3",
+      "priority": 1
+    },
+
+
     {
       "inference_point": "cloud",
-      "provider": "DeepSeek",
+      "model": "together-ai/deepseek-ai/DeepSeek-R1",
+      "handler": "CloudInference.get_together_ai_r1",
+      "priority": 1
+    },
+
+    {
+      "inference_point": "cloud",
+      "model": "together-ai/deepseek-ai/DeepSeek-V3",
+      "handler": "CloudInference.get_together_ai_v3",
+      "priority": 1
+    },
+
+    {
+      "inference_point": "cloud",
       "handler": "CloudInference.get_deepseek_r1",
-      "priority": 1
-    },
-    {
-      "inference_point": "cloud",
-      "provider": "Llama",
-      "handler": "CloudInference.get_llama_cloud",
-      "priority": 1
-    },
-    {
-      "inference_point": "cloud",
-      "provider": "Groq",
-      "model": "mixtral-8x7b-32768",
-      "handler": "CloudInference.get_groq_deepseek",
-      "priority": 1
-    },
-    {
-      "inference_point": "cloud",
-      "handler": "CloudInference.get_deepseek_r1",
-      "priority": 0,
+      "priority": 1,
       "is_fallback": true
     }
+
+
   ]
 }

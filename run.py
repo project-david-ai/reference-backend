@@ -10,7 +10,6 @@ logging_utility = LoggingUtility(app)
 app.logger.addHandler(logging_utility.handler)
 app.logger.setLevel(logging_utility.level)
 
-
 def create_tables():
     with app.app_context():
         initialize_database()
@@ -20,4 +19,4 @@ def create_tables():
 create_tables()
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(port=5000, debug=True, use_reloader=False)
