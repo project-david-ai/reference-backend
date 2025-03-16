@@ -2,13 +2,15 @@ from datetime import datetime
 import sqlalchemy as sa
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-import entities_api
+
+from entities import Entities
+
 from backend.app.extensions import db
 from backend.app.services.identifier_service import IdentifierService
 from backend.app.services.logging_service.logger import LoggingUtility
 
 # Initialize the client
-client = entities_api.OllamaClient()
+client = Entities()
 
 logging_utility = LoggingUtility()
 

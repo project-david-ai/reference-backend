@@ -1,4 +1,5 @@
-import entities_api
+from entities import Entities
+
 from flask import jsonify, request, Response, stream_with_context
 from flask_jwt_extended import jwt_required
 from backend.app.services.logging_service.logger import LoggingUtility
@@ -8,7 +9,7 @@ from . import bp_common
 logging_utility = LoggingUtility()
 
 # Initialize the client
-client = entities_api.OllamaClient()
+client = Entities()
 
 
 @bp_common.route('/api/thread/create', methods=['POST'])
