@@ -1,6 +1,4 @@
 import json
-import asyncio
-
 from flask import jsonify, request, Response, stream_with_context
 from flask_jwt_extended import jwt_required
 
@@ -35,6 +33,7 @@ def process_messages():
     """
     logging_utility.info("Request received: %s", request.json)
     logging_utility.info("Headers: %s", request.headers)
+
     try:
         data = request.json
 
@@ -73,12 +72,12 @@ def process_messages():
         )
         run_id = run.id
 
-
-
-        # Define an async generator that uses the Entities client for streaming.
-        async def async_generate_chunks():
+        def generate_chunks():
             try:
-                async for chunk in client.inference_service.stream_inference_response(
+                # Resolve the proper inference handler (if needed)
+                # handler = llm_router.resolve_handler(inference_point, provider, selected_model)
+                # For now we directly stream using the inference service:
+                for chunk in client.inference_service.stream_inference_response(
                         provider="Hyperbolic",
                         model=selected_model,
                         thread_id=thread_id,
@@ -86,51 +85,19 @@ def process_messages():
                         run_id=run_id,
                         assistant_id="default"
                 ):
-
-                    print(chunk)
-
                     logging_utility.debug("Streaming chunk: %s", chunk)
-                    # Wrap each chunk in SSE format.
-                    # If the chunk is not a dict, you might want to adjust formatting.
                     yield "data: " + json.dumps(chunk) + "\n\n"
+                yield "data: [DONE]\n\n"
             except Exception as e:
                 err_msg = str(e) or repr(e)
                 logging_utility.error("Error during streaming inference: %s", err_msg)
                 yield "data: " + json.dumps({"error": err_msg}) + "\n\n"
             finally:
                 try:
-                    await client.inference_service.close()
+                    client.inference_service.close()
                 except Exception as e:
                     logging_utility.error("Error closing inference service: %s", repr(e))
 
-        # Synchronous wrapper that yields chunks as soon as they're available.
-        def generate_chunks():
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            gen = async_generate_chunks()  # create the async generator instance
-            try:
-                while True:
-                    try:
-                        # Get the next chunk from the async generator.
-                        chunk = loop.run_until_complete(gen.__anext__())
-                        if chunk is None:
-                            logging_utility.error("Received None chunk; ending stream.")
-                            break
-                        # Immediately yield the chunk.
-                        yield chunk
-                    except StopAsyncIteration:
-                        break
-                    except Exception as inner_e:
-                        logging_utility.error("Error inside synchronous generator: %s", repr(inner_e))
-                        break
-            finally:
-                try:
-                    loop.run_until_complete(client.inference_service.close())
-                except Exception as close_e:
-                    logging_utility.error("Error closing inference service in finalizer: %s", repr(close_e))
-                loop.close()
-
-        # Return an SSE response.
         return Response(
             stream_with_context(generate_chunks()),
             content_type='text/event-stream',
