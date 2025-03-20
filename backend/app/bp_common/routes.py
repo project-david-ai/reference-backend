@@ -1,7 +1,9 @@
-from entities import Entities
+from datetime import datetime
 
-from flask import jsonify, request, Response, stream_with_context
-from flask_jwt_extended import jwt_required
+from entities import Entities
+from flask import request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
 from backend.app.services.logging_service.logger import LoggingUtility
 from . import bp_common
 
@@ -70,6 +72,53 @@ def list_threads():
         # Log the error with the exception details
         logging_utility.error("Failed to list threads for user ID: %s. Error: %s", user_id, str(e))
         return jsonify({"error": "Failed to list threads"}), 500  # Return a 500 status code for server error
+
+
+
+@bp_common.route('/api/thread/delete', methods=['POST'])
+@jwt_required()
+def delete_thread():
+    """Handle thread deletion with REST-compliant status codes"""
+    try:
+        # Validate request format
+        if not request.is_json:
+            return jsonify({'error': 'Request must be JSON'}), 415
+
+        data = request.get_json()
+        thread_id = data.get('thread_id')
+
+        if not thread_id:
+            return jsonify({'error': 'thread_id is required'}), 400
+
+        # Get current user from JWT
+        current_user = get_jwt_identity()
+
+        # Perform deletion with user validation
+        deleted = client.thread_service.delete_thread(
+            thread_id=thread_id,
+        )
+
+        # REST best practice: DELETE is idempotent, success regardless of prior existence
+        if deleted:
+            return jsonify({
+                'status': 'deleted',
+                'thread_id': thread_id,
+                'timestamp': datetime.utcnow().isoformat()
+            }), 200
+        else:
+            return jsonify({
+                'status': 'not_found',
+                'thread_id': thread_id,
+                'message': 'No thread found with given ID'
+            }), 200
+
+    except PermissionError as e:
+        return jsonify({'error': str(e)}), 403
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        logging_utility.error(f'Thread deletion failed: {str(e)}')
+        return jsonify({'error': 'Internal server error'}), 500
 
 
 @bp_common.route('/api/message/list', methods=['GET'])
