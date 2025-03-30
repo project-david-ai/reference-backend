@@ -1,4 +1,6 @@
 import json
+import time
+
 from flask import jsonify, request, Response, stream_with_context
 from flask_jwt_extended import jwt_required
 
@@ -20,6 +22,7 @@ llm_router = LlmRouter('llm_model_routing_config.json')
 
 # Import the Flask blueprint.
 from . import bp_llama
+
 
 
 @bp_llama.route('/api/messages/process', methods=['POST'])
@@ -44,6 +47,13 @@ def process_messages():
         inference_point = data.get('inferencePoint')
         provider = data.get('provider', "Hyperbolic")  # Force provider to "Hyperbolic"
 
+
+        print(selected_model)
+        print(provider)
+        #time.sleep(1000)
+
+
+
         logging_utility.info(
             "Processing request: user_id=%s, thread_id=%s, model=%s, inference_point=%s, provider=%s",
             user_id, thread_id, selected_model, inference_point, provider
@@ -57,7 +67,7 @@ def process_messages():
             raise ValueError("Message content is missing")
 
         # Create a message record via the Entities client.
-        message = client.message_service.create_message(
+        message = client.messages.create_message(
             thread_id=thread_id,
             assistant_id="default",
             content=user_message,
@@ -65,7 +75,7 @@ def process_messages():
         )
 
         # Create a run record
-        run = client.run_service.create_run(
+        run = client.runs.create_run(
             thread_id=thread_id,
             assistant_id="default"
         )

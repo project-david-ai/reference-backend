@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from entities import Entities
 
+from backend.app.bp_llama.routes import logging_utility
 from backend.app.extensions import db
 from backend.app.services.identifier_service import IdentifierService
 from backend.app.services.logging_service.logger import LoggingUtility
@@ -12,8 +13,8 @@ from backend.app.services.logging_service.logger import LoggingUtility
 # Initialize the client
 client = Entities()
 
-logging_utility = LoggingUtility()
 
+logging_utility = LoggingUtility()
 
 class LocalUser(UserMixin, db.Model):
     __tablename__ = 'local_users'
@@ -101,7 +102,7 @@ def create_default_assistant(user_id):
     try:
         assistant_record = Assistant.query.filter_by(user_id=user_id).first()
         if not assistant_record:
-            assistant = client.assistant_service.create_assistant(
+            assistant = client.assistants.create_assistant(
                 name='Mathy',
                 #user_id=user_id,
                 description='My helpful maths tutor',
@@ -129,16 +130,14 @@ def create_default_assistant(user_id):
 
 def confirm_user_exists_or_create(user_id):
     try:
-        user = client.user_service.retrieve_user(user_id=user_id)
+        user = client.users.retrieve_user(user_id=user_id)
         logging_utility.info("User exists in the upstream API: %s", user)
         return user
     except Exception as e:
         logging_utility.warning("User not found in the upstream API, creating a new user: %s", str(e))
-        new_user = client.user_service.create_user(
-            username='admin',
-            first_name='Default',
-            last_name='Admin',
-            password='admin'
+        new_user = client.users.create_user(
+            name='admin'
+
         )
         logging_utility.info("Created new user in the upstream API: %s", new_user)
 
@@ -155,6 +154,9 @@ def confirm_user_exists_or_create(user_id):
                 password_hash=generate_password_hash('admin'),
                 is_admin=True,
                 role='admin'
+
+
+
             )
             db.session.add(default_user)
         db.session.commit()
@@ -169,7 +171,7 @@ def confirm_default_user():
     if not default_user:
         # No default user exists locally, create one
         try:
-            new_user = client.user_service.create_user(
+            new_user = client.users.create_user(
                 username='admin',
                 first_name='Default',
                 last_name='Admin',
@@ -194,13 +196,13 @@ def confirm_default_user():
     else:
         try:
             # Check if the user exists in the upstream API
-            confirmed_user = client.user_service.retrieve_user(user_id=default_user.id)
+            confirmed_user = client.users.retrieve_user(user_id=default_user.id)
             logging_utility.info("User exists in the upstream API: %s", confirmed_user)
         except Exception as e:
             logging_utility.warning("User ID %s not found in the upstream API: %s", default_user.id, str(e))
             try:
                 # Drop the current ID and create a new user in the API
-                new_user = client.user_service.create_user(
+                new_user = client.users.create_user(
                     name='admin',
                 )
                 logging_utility.info("Created new user in the upstream API: %s", new_user)
