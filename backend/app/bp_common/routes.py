@@ -33,7 +33,7 @@ def create_thread():
 
     try:
         # Attempt to create a thread
-        thread = client.thread_service.create_thread(participant_ids=[userId])
+        thread = client.threads.create_thread(participant_ids=[userId])
         logging_utility.info("Thread created successfully. Thread ID: %s", thread.id)
 
         return jsonify({"thread_id": thread.id}), 201  # Return the thread ID with a 201 status code
@@ -63,7 +63,7 @@ def list_threads():
 
     try:
         # Attempt to list threads
-        threads = client.thread_service.list_threads(user_id=user_id)
+        threads = client.threads.list_threads(user_id=user_id)
         logging_utility.info("Threads listed successfully. Number of threads: %d", len(threads))
 
         return jsonify({"thread_ids": threads}), 200
@@ -94,7 +94,7 @@ def delete_thread():
         current_user = get_jwt_identity()
 
         # Perform deletion with user validation
-        deleted = client.thread_service.delete_thread(
+        deleted = client.threads.delete_thread(
             thread_id=thread_id,
         )
 
@@ -129,7 +129,7 @@ def list_messages():
         return jsonify({"error": "Missing 'thread_id' parameter"}), 400
 
     try:
-        messages = client.message_service.list_messages(thread_id=thread_id)
+        messages = client.messages.list_messages(thread_id=thread_id)
         logging_utility.info("Listed messages successfully. Number of messages: %d", len(messages))
         return jsonify({"messages": messages}), 200
     except Exception as e:
@@ -149,7 +149,7 @@ def cancel_run():
             return jsonify({"error": "Missing 'run_id' parameter"}), 400
 
         # Attempt to cancel the run
-        client.run_service.cancel_run(run_id=run_id)
+        client.runs.cancel_run(run_id=run_id)
         logging_utility.info("Run with ID %s cancelled successfully", run_id)
 
         return 200
