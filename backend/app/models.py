@@ -5,7 +5,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from entities import Entities
 
-from backend.app.bp_llama.routes import logging_utility
+
+from entities_common.utils import LoggingUtility
+
+
 from backend.app.extensions import db
 from backend.app.services.identifier_service import IdentifierService
 from backend.app.services.logging_service.logger import LoggingUtility
