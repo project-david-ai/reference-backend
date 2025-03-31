@@ -1,87 +1,86 @@
 import json
-import time
-
+import threading
 from flask import jsonify, request, Response, stream_with_context
 from flask_jwt_extended import jwt_required
 
-# Import backend services for routing and logging.
-from backend.app.services.llm_routing_services.llm_router_service import LlmRouter
 from backend.app.services.logging_service.logger import LoggingUtility
-
-# Import the public SDK interface.
 from entities import Entities
-
-# Initialize logging.
-logging_utility = LoggingUtility()
-
-# Instantiate the main Entities client.
-client = Entities()
-
-# Initialize the LLM router with the configuration file.
-llm_router = LlmRouter('llm_model_routing_config.json')
-
-# Import the Flask blueprint.
+from entities.clients.actions import ActionsClient
+from entities import EventsInterface  # Must expose MonitorLauncher here
 from . import bp_llama
 
+logging_utility = LoggingUtility()
+client = Entities(base_url="http://localhost:9000")
+actions_client = ActionsClient(base_url="http://localhost:9000")
+
+
+def my_custom_tool_handler(run_id, run_data, pending_actions):
+    try:
+        logging_utility.info(f"[ACTION_REQUIRED] run {run_id} has {len(pending_actions)} pending action(s)")
+
+        for action in pending_actions:
+            action_id = action.get("id")
+            tool_name = action.get("tool_name")
+            args = action.get("function_args", {})
+
+            logging_utility.info(f"[ACTION] ID: {action_id}, Tool: {tool_name}, Args: {args}")
+
+            # TODO: Here you can route to your tool logic and return the result
+            # You could optionally collect results and submit them using:
+            # client.runs.submit_tool_outputs(...)
+
+    except Exception as e:
+        logging_utility.error(f"[ToolHandler] Error processing actions for run {run_id}: {e}")
 
 
 @bp_llama.route('/api/messages/process', methods=['POST'])
 @jwt_required()
 def process_messages():
-    """
-    Handle incoming message processing requests:
-      - Validate the request.
-      - Create message and run records via the Entities client.
-      - Stream inference response chunks as properly formatted JSON.
-    """
     logging_utility.info("Request received: %s", request.json)
-    logging_utility.info("Headers: %s", request.headers)
+    run_id_local = None
 
     try:
         data = request.json
-
         messages = data.get('messages', [])
         user_id = data.get('userId') or data.get('user_id')
         thread_id = data.get('threadId') or data.get('thread_id')
         selected_model = data.get('model', 'llama3.1')
-        inference_point = data.get('inferencePoint')
-        provider = data.get('provider', "Hyperbolic")  # Force provider to "Hyperbolic"
+        provider = data.get('provider', "Hyperbolic")
 
-
-        print(selected_model)
-        print(provider)
-        #time.sleep(1000)
-
-
-
-        logging_utility.info(
-            "Processing request: user_id=%s, thread_id=%s, model=%s, inference_point=%s, provider=%s",
-            user_id, thread_id, selected_model, inference_point, provider
-        )
-
+        if not thread_id:
+            raise ValueError("Missing 'threadId' in request")
         if not messages or not isinstance(messages, list):
-            raise ValueError("Invalid or missing 'messages' in request")
-
+            raise ValueError("Invalid or missing 'messages'")
         user_message = messages[0].get('content', '').strip()
         if not user_message:
             raise ValueError("Message content is missing")
 
-        # Create a message record via the Entities client.
+        # Step 1: Create message and run
         message = client.messages.create_message(
             thread_id=thread_id,
             assistant_id="default",
             content=user_message,
             role='user'
         )
-
-        # Create a run record
         run = client.runs.create_run(
             thread_id=thread_id,
             assistant_id="default"
         )
         run_id = run.id
+        run_id_local = run_id
+        logging_utility.info(f"Created run {run_id}")
 
-        # Initialize the synchronous inference stream wrapper
+        # Step 2: Launch monitor with custom tool handler
+        monitor_launcher = EventsInterface.MonitorLauncher(
+            client,
+            actions_client,
+            run_id,
+            on_action_required=my_custom_tool_handler,
+            events=EventsInterface
+        )
+        monitor_launcher.start()
+
+        # Step 3: Setup sync stream
         sync_stream = client.synchronous_inference_stream
         sync_stream.setup(
             user_id=user_id,
@@ -91,42 +90,34 @@ def process_messages():
             run_id=run_id
         )
 
-        # Define a generator function to stream response chunks as raw JSON
         def generate_chunks():
             try:
                 for chunk in sync_stream.stream_chunks(provider=provider, model=selected_model):
-                    logging_utility.debug("Streaming chunk: %s", chunk)
-                    # Make sure each JSON object is on its own line with a newline terminator
+                    logging_utility.debug(f"Streaming chunk: {chunk}")
                     yield json.dumps(chunk) + "\n"
-                # Send completion marker
-                yield json.dumps({"type": "status", "status": "complete"}) + "\n"
+                yield json.dumps({"type": "status", "status": "inference_complete"}) + "\n"
             except Exception as e:
-                err_msg = str(e) or repr(e)
-                logging_utility.error("Error during streaming inference: %s", err_msg)
-                yield json.dumps({'type': 'error', 'error': err_msg}) + "\n"
+                yield json.dumps({'type': 'error', 'error': str(e)}) + "\n"
             finally:
-                logging_utility.info("Cleaning up streaming resources.")
                 try:
                     sync_stream.close()
                 except Exception as e:
-                    logging_utility.error("Error closing synchronous inference stream: %s", repr(e))
+                    logging_utility.error(f"Error closing sync stream: {repr(e)}")
 
-        # Return the streaming response with appropriate headers for JSON streaming
         return Response(
             stream_with_context(generate_chunks()),
-            content_type='application/x-ndjson',  # Using newline delimited JSON format
+            content_type='application/x-ndjson',
             headers={
                 'X-Conversation-Id': run_id,
                 'Cache-Control': 'no-cache',
                 'Connection': 'keep-alive',
-                'Access-Control-Allow-Origin': '*',  # Add CORS header if needed
+                'Access-Control-Allow-Origin': '*',
                 'Access-Control-Expose-Headers': 'X-Conversation-Id'
             }
         )
 
     except ValueError as ve:
-        logging_utility.error("Validation error: %s", str(ve))
         return jsonify({'error': str(ve)}), 400
     except Exception as e:
-        logging_utility.error("Unexpected error: %s", repr(e))
-        return jsonify({'error': 'An error occurred while processing the message'}), 500
+        logging_utility.error(f"Unexpected error in /process: {repr(e)}", exc_info=True)
+        return jsonify({'error': 'Internal server error'}), 500
