@@ -2,9 +2,9 @@
 from dotenv import load_dotenv
 import os
 import pprint
-from entities import Entities
+from projectdavid import Entity
 
-client = Entities()
+client = Entity()
 load_dotenv()
 
 user = client.users.create_user(name='test_user')
