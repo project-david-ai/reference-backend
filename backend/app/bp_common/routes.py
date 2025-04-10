@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from entities import Entities
+from projectdavid import Entity
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -11,7 +11,7 @@ from . import bp_common
 logging_utility = LoggingUtility()
 
 # Initialize the client
-client = Entities()
+client = Entity()
 
 
 @bp_common.route('/api/thread/create', methods=['POST'])
