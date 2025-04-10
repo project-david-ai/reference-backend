@@ -1,11 +1,12 @@
 import pprint
 
-from entities import Entities
+
+from projectdavid import Entity
 
 # Full integration test
 if __name__ == "__main__":
     # Step 1: Initialize the Entities client
-    entities_client = Entities()
+    entities_client = Entity()
 
     # Step 2: Explicitly set up the required entities
     user = entities_client.user_service.create_user(name="test_case3")
