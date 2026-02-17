@@ -34,7 +34,10 @@ class RipeStatService:
 
     def get_address_space_usage(self, resource, all_level_more_specifics=True):
         url = f"{self.base_url}/address-space-usage/data.json"
-        params = {"resource": resource, "all_level_more_specifics": all_level_more_specifics}
+        params = {
+            "resource": resource,
+            "all_level_more_specifics": all_level_more_specifics,
+        }
         try:
             response = self.session.get(url, params=params)
             response.raise_for_status()
@@ -59,7 +62,9 @@ class RipeStatService:
             print(f"Error: {e}")
             return None
 
-    def get_announced_prefixes(self, resource, starttime=None, endtime=None, min_peers_seeing=10):
+    def get_announced_prefixes(
+        self, resource, starttime=None, endtime=None, min_peers_seeing=10
+    ):
         url = f"{self.base_url}/announced-prefixes/data.json"
         params = {"resource": resource, "min_peers_seeing": min_peers_seeing}
         if starttime:
@@ -101,7 +106,9 @@ class RipeStatService:
             print(f"Error: {e}")
             return None
 
-    def get_bgp_updates(self, resource, starttime=None, endtime=None, rrcs=None, unix_timestamps=False):
+    def get_bgp_updates(
+        self, resource, starttime=None, endtime=None, rrcs=None, unix_timestamps=False
+    ):
         url = f"{self.base_url}/bgp-updates/data.json"
         params = {"resource": resource, "unix_timestamps": unix_timestamps}
         if starttime:
@@ -119,7 +126,9 @@ class RipeStatService:
             print(f"Error: {e}")
             return None
 
-    def get_asn_neighbours_history(self, resource, starttime=None, endtime=None, max_rows=1800):
+    def get_asn_neighbours_history(
+        self, resource, starttime=None, endtime=None, max_rows=1800
+    ):
         url = f"{self.base_url}/asn-neighbours-history/data.json"
         params = {"resource": resource, "max_rows": max_rows}
         if starttime:
@@ -135,7 +144,9 @@ class RipeStatService:
             print(f"Error: {e}")
             return None
 
-    def get_country_resource_stats(self, resource, starttime=None, endtime=None, resolution=None):
+    def get_country_resource_stats(
+        self, resource, starttime=None, endtime=None, resolution=None
+    ):
         url = f"{self.base_url}/country-resource-stats/data.json"
         params = {"resource": resource}
         if starttime:

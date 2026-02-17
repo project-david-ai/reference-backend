@@ -9,12 +9,11 @@ user_functions = [
                 "properties": {
                     "faux_identity": {
                         "type": "string",
-                        "description": "The faux identity of the user"
+                        "description": "The faux identity of the user",
                     }
                 },
-                "required": ["faux_identity"]
-            }
-        }
+                "required": ["faux_identity"],
+            },
+        },
     }
 ]
-

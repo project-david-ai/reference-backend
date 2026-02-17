@@ -1,5 +1,3 @@
-
-
 def get_admin_user_ids():
     try:
         # Create an application context

@@ -1,6 +1,8 @@
-from openai import OpenAI
 import os
+
 from dotenv import load_dotenv
+from openai import OpenAI
+
 from backend.app.services.logging_service.logger import LoggingUtility
 
 load_dotenv()
@@ -21,23 +23,28 @@ class ImageGeneratorService:
         :return: URL of the generated image.
         """
         try:
-            self.logging_utility.info("Entering generate_image with prompt='%s', size='%s', quality='%s', n=%d",
-                                      prompt, size, quality, n)
+            self.logging_utility.info(
+                "Entering generate_image with prompt='%s', size='%s', quality='%s', n=%d",
+                prompt,
+                size,
+                quality,
+                n,
+            )
 
             response = self.client.images.generate(
-                model="dall-e-3",
-                prompt=prompt,
-                size=size,
-                quality=quality,
-                n=n
+                model="dall-e-3", prompt=prompt, size=size, quality=quality, n=n
             )
 
             image_url = response.data[0].url
-            self.logging_utility.info("Image generated successfully. URL: %s", image_url)
+            self.logging_utility.info(
+                "Image generated successfully. URL: %s", image_url
+            )
 
             return image_url
         except Exception as e:
-            self.logging_utility.error("An error occurred during image generation: %s", str(e))
+            self.logging_utility.error(
+                "An error occurred during image generation: %s", str(e)
+            )
             return None
 
 

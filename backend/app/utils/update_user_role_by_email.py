@@ -1,11 +1,13 @@
-import sys
 import os
+import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+)
 
+from backend.app import create_app
 from backend.app.extensions import db
 from backend.app.models import User
-from backend.app import create_app
 
 
 def update_user_role_by_email(email, new_role):
@@ -26,6 +28,7 @@ def update_user_role_by_email(email, new_role):
         print(f"An error occurred while updating the user role: {str(e)}")
         db.session.rollback()
 
+
 if __name__ == "__main__":
     # Example usage: update_user_role_by_email('user@example.com', 'admin')
-    update_user_role_by_email('prime.thanos336@gmail.com', 'developer')
+    update_user_role_by_email("prime.thanos336@gmail.com", "developer")

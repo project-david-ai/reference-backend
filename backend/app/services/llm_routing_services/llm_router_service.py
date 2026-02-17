@@ -5,6 +5,7 @@ from backend.app.services.logging_service.logger import LoggingUtility
 
 logging_utility = LoggingUtility()
 
+
 class LlmRouter:
     """
     A dynamic routing service for resolving the appropriate LLM (Large Language Model) handler
@@ -46,7 +47,7 @@ class LlmRouter:
             config_path (str): Path to the JSON configuration file containing routing rules.
         """
         self.routes = self._load_routes(config_path)
-        self.routes.sort(key=lambda x: x.get('priority', 0), reverse=True)
+        self.routes.sort(key=lambda x: x.get("priority", 0), reverse=True)
         logging_utility.info("Router initialized with %d routes.", len(self.routes))
 
     def _load_routes(self, config_path):
@@ -63,10 +64,12 @@ class LlmRouter:
             Exception: If the configuration file cannot be loaded or parsed.
         """
         try:
-            with open(config_path, 'r') as f:
+            with open(config_path, "r") as f:
                 config = json.load(f)
-            logging_utility.info("Successfully loaded routing configuration from %s.", config_path)
-            return config.get('routes', [])
+            logging_utility.info(
+                "Successfully loaded routing configuration from %s.", config_path
+            )
+            return config.get("routes", [])
         except Exception as e:
             logging_utility.error("Failed to load routing configuration: %s", str(e))
             raise
@@ -88,21 +91,28 @@ class LlmRouter:
         """
         logging_utility.info(
             "Resolving handler for inference_point=%s, provider=%s, model=%s",
-            inference_point, provider, model
+            inference_point,
+            provider,
+            model,
         )
 
         for route in self.routes:
             if self._matches_route(route, inference_point, provider, model):
-                handler = route['handler']
+                handler = route["handler"]
                 logging_utility.info(
                     "Matched route: inference_point=%s, provider=%s, model=%s → handler=%s",
-                    inference_point, provider, model, handler
+                    inference_point,
+                    provider,
+                    model,
+                    handler,
                 )
                 return handler
 
         logging_utility.warning(
             "No matching route found for inference_point=%s, provider=%s, model=%s. Using fallback.",
-            inference_point, provider, model
+            inference_point,
+            provider,
+            model,
         )
         return self._get_fallback_handler(inference_point)
 
@@ -119,11 +129,11 @@ class LlmRouter:
         Returns:
             bool: True if the route matches, False otherwise.
         """
-        if route.get('inference_point') != inference_point:
+        if route.get("inference_point") != inference_point:
             return False
-        if 'provider' in route and route['provider'] != provider:
+        if "provider" in route and route["provider"] != provider:
             return False
-        if 'model' in route and route['model'] != model:
+        if "model" in route and route["model"] != model:
             return False
         return True
 
@@ -141,7 +151,13 @@ class LlmRouter:
             ValueError: If no fallback handler is found.
         """
         for route in self.routes:
-            if route.get('inference_point') == inference_point and route.get('is_fallback', False):
-                return route['handler']
-        logging_utility.error("No fallback handler found for inference_point=%s.", inference_point)
-        raise ValueError(f"No fallback handler found for inference_point={inference_point}")
+            if route.get("inference_point") == inference_point and route.get(
+                "is_fallback", False
+            ):
+                return route["handler"]
+        logging_utility.error(
+            "No fallback handler found for inference_point=%s.", inference_point
+        )
+        raise ValueError(
+            f"No fallback handler found for inference_point={inference_point}"
+        )

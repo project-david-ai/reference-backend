@@ -20,3 +20,4 @@ services:
 networks:
   aether_network:
     driver: bridge
+

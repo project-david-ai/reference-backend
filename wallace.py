@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 
 from dotenv import load_dotenv
 from projectdavid import Entity
@@ -28,17 +28,17 @@ tool_definition = {
                 "properties": {
                     "departure": {
                         "type": "string",
-                        "description": "The departure city (airport code)."
+                        "description": "The departure city (airport code).",
                     },
                     "arrival": {
                         "type": "string",
-                        "description": "The arrival city (airport code)."
-                    }
+                        "description": "The arrival city (airport code).",
+                    },
                 },
-                "required": ["departure", "arrival"]
-            }
+                "required": ["departure", "arrival"],
+            },
         }
-    }
+    },
 }
 
 tool_id = "tool_yPCcO2X1LFK7AatzmBsnbc"
@@ -48,7 +48,7 @@ from projectdavid import Entity
 client = Entity()
 
 
-#client.tools.associate_tool_with_assistant(tool_id='tool_yPCcO2X1LFK7AatzmBsnbc',
+# client.tools.associate_tool_with_assistant(tool_id='tool_yPCcO2X1LFK7AatzmBsnbc',
 #                                           assistant_id="default")
 #
 

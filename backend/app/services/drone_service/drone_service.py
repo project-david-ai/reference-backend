@@ -1,18 +1,19 @@
+import os
 import time
 
-from backend.app.services.logging_service.logger import LoggingUtility
-import os
-from dotenv import load_dotenv
 import entities_api
-from backend.app.extensions import db
+from dotenv import load_dotenv
+
 from backend.app import create_app
+from backend.app.extensions import db
 from backend.app.models import LocalUser
+from backend.app.services.logging_service.logger import LoggingUtility
 from backend.app.services.message_parsing.message_service import MessageService
 
 load_dotenv()
 
 # Access the loaded variable
-service_drone = os.getenv('SERVICE_DONE0')
+service_drone = os.getenv("SERVICE_DONE0")
 client = entities_api.OllamaClient()
 logging_utility = LoggingUtility()
 app = create_app()
@@ -29,7 +30,9 @@ class ConversationService:
                 admin_user_ids = [user.id for user in users if user.is_admin]
                 return admin_user_ids
         except Exception as e:
-            logging_utility.error(f"An error occurred while fetching admins' IDs: {str(e)}")
+            logging_utility.error(
+                f"An error occurred while fetching admins' IDs: {str(e)}"
+            )
             return []
 
     def create_maintenance_thread(self, user_id):
@@ -48,20 +51,23 @@ class ConversationService:
         return latest_message
 
     def create_user_message(self, thread_id, content):
-        self.client.message_service.create_message(thread_id=thread_id,
-                                                   content=content,
-                                                   role='user',
-                                                   sender_id=self.get_admin_user_ids()[0])
+        self.client.message_service.create_message(
+            thread_id=thread_id,
+            content=content,
+            role="user",
+            sender_id=self.get_admin_user_ids()[0],
+        )
 
     def run_conversation(self, thread_id, assistant_id):
-        run = self.client.run_service.create_run(thread_id=thread_id,
-                                                 assistant_id=assistant_id)
+        run = self.client.run_service.create_run(
+            thread_id=thread_id, assistant_id=assistant_id
+        )
         return run
 
     def process_chunk(self, thread_id, run_id, assistant_id):
-        for chunk in self.client.runner.process_conversation(thread_id=thread_id,
-                                                             run_id=run_id,
-                                                             assistant_id=assistant_id):
+        for chunk in self.client.runner.process_conversation(
+            thread_id=thread_id, run_id=run_id, assistant_id=assistant_id
+        ):
             logging_utility.info(chunk)
 
 
@@ -76,5 +82,9 @@ if __name__ == "__main__":
     # Creates a temp thread for the maintenance run
     thread = conversation_service.create_maintenance_thread(user_id=user_id)
     conversation_service.create_user_message(thread_id=thread.id, content=user_message)
-    run = conversation_service.run_conversation(thread_id=thread.id, assistant_id=service_drone)
-    conversation_service.process_chunk(thread_id=thread.id, run_id=run['id'], assistant_id=service_drone)
+    run = conversation_service.run_conversation(
+        thread_id=thread.id, assistant_id=service_drone
+    )
+    conversation_service.process_chunk(
+        thread_id=thread.id, run_id=run["id"], assistant_id=service_drone
+    )

@@ -17,9 +17,9 @@ def handle_user_files(upload_service, user_id, thread_id, entity):
     - tuple: A tuple containing two lists: file_urls (list of str), and file_objects (list of file-like objects).
     """
 
-    if entity == 'q':
+    if entity == "q":
         pattern = r"https://storage\.googleapis\.com/q_retrieval/(.*)"
-    if entity == 'r':
+    if entity == "r":
         pattern = r"https://storage\.googleapis\.com/r_retrieval/(.*)"
 
     # Fetch file URLs from GCS for the given user and thread

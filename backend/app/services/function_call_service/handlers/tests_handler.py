@@ -1,6 +1,7 @@
 import random
 
 from backend.app.services.logging_service.logger import LoggingUtility
+
 logging_utility = LoggingUtility()
 
 
@@ -28,7 +29,7 @@ class TestsHandler:
         return {
             "departure": departure,
             "arrival": arrival,
-            "flight_time": flight_duration
+            "flight_time": flight_duration,
         }
 
     # Example usage:

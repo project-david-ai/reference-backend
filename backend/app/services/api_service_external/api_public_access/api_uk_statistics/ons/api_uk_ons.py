@@ -1,7 +1,8 @@
-import time
-import requests
-import pandas as pd
 import io
+import time
+
+import pandas as pd
+import requests
 
 
 class OnsApiService:
@@ -28,7 +29,7 @@ class OnsApiService:
         try:
             csv_url = metadata["downloads"]["csv"]["href"]
             csv_data = requests.get(csv_url).content
-            data_df = pd.read_csv(io.StringIO(csv_data.decode('utf-8')))
+            data_df = pd.read_csv(io.StringIO(csv_data.decode("utf-8")))
             return metadata, data_df
         except (KeyError, requests.exceptions.RequestException) as e:
             print(f"An error occurred while retrieving the data file: {e}")
@@ -63,10 +64,16 @@ class OnsApiService:
             if dimensions is None:
                 dimensions = [dim["name"] for dim in metadata["dimensions"]]
 
-            dimension_labels = {dim["name"]: dim["label"] for dim in metadata["dimensions"]}
-            selected_columns = [dim for dim in dimensions if dim in uk_business_data.columns] + ["v4_0"]
+            dimension_labels = {
+                dim["name"]: dim["label"] for dim in metadata["dimensions"]
+            }
+            selected_columns = [
+                dim for dim in dimensions if dim in uk_business_data.columns
+            ] + ["v4_0"]
 
-            renamed_data = uk_business_data[selected_columns].rename(columns={"v4_0": "Value"})
+            renamed_data = uk_business_data[selected_columns].rename(
+                columns={"v4_0": "Value"}
+            )
             return renamed_data.to_dict(orient="records")
         else:
             return None
@@ -79,15 +86,23 @@ class OnsApiService:
             if dimensions is None:
                 dimensions = [dim["name"] for dim in metadata["dimensions"]]
 
-            dimension_labels = {dim["name"]: dim["label"] for dim in metadata["dimensions"]}
-            selected_columns = [dim for dim in dimensions if dim in wellbeing_data.columns] + ["v4_2"]
+            dimension_labels = {
+                dim["name"]: dim["label"] for dim in metadata["dimensions"]
+            }
+            selected_columns = [
+                dim for dim in dimensions if dim in wellbeing_data.columns
+            ] + ["v4_2"]
 
-            renamed_data = wellbeing_data[selected_columns].rename(columns={"v4_2": "Value"})
+            renamed_data = wellbeing_data[selected_columns].rename(
+                columns={"v4_2": "Value"}
+            )
             return renamed_data.to_dict(orient="records")
         else:
             return None
 
-    def get_wellbeing_by_local_authority_data(self, dimensions=None, page=1, page_size=100):
+    def get_wellbeing_by_local_authority_data(
+        self, dimensions=None, page=1, page_size=100
+    ):
         metadata_url = "https://api.beta.ons.gov.uk/v1/datasets/wellbeing-local-authority/editions/time-series/versions/4"
         metadata, wellbeing_data = self.get_data_and_metadata(metadata_url)
 
@@ -95,9 +110,15 @@ class OnsApiService:
             if dimensions is None:
                 dimensions = [dim["name"] for dim in metadata["dimensions"]]
 
-            dimension_labels = {dim["name"]: dim["label"] for dim in metadata["dimensions"]}
-            value_column = wellbeing_data.columns[-1]  # Assuming the value column is the last column
-            selected_columns = [dim for dim in dimensions if dim in wellbeing_data.columns] + [value_column]
+            dimension_labels = {
+                dim["name"]: dim["label"] for dim in metadata["dimensions"]
+            }
+            value_column = wellbeing_data.columns[
+                -1
+            ]  # Assuming the value column is the last column
+            selected_columns = [
+                dim for dim in dimensions if dim in wellbeing_data.columns
+            ] + [value_column]
 
             # Apply pagination
             start_index = (page - 1) * page_size
@@ -118,33 +139,43 @@ class OnsApiService:
             if dimensions is None:
                 dimensions = [dim["name"] for dim in metadata["dimensions"]]
 
-            dimension_labels = {dim["name"]: dim["label"] for dim in metadata["dimensions"]}
-            value_column = weekly_deaths_data.columns[-1]  # Assuming the value column is the last column
-            selected_columns = [dim for dim in dimensions if dim in weekly_deaths_data.columns] + [value_column]
+            dimension_labels = {
+                dim["name"]: dim["label"] for dim in metadata["dimensions"]
+            }
+            value_column = weekly_deaths_data.columns[
+                -1
+            ]  # Assuming the value column is the last column
+            selected_columns = [
+                dim for dim in dimensions if dim in weekly_deaths_data.columns
+            ] + [value_column]
 
             # Apply pagination
             start = (page - 1) * page_size
             end = start + page_size
             paginated_data = weekly_deaths_data.iloc[start:end]
 
-            renamed_data = paginated_data[selected_columns].rename(columns={value_column: "Value"})
+            renamed_data = paginated_data[selected_columns].rename(
+                columns={value_column: "Value"}
+            )
 
             # Add pagination metadata
             total_records = len(weekly_deaths_data)
-            total_pages = (total_records + page_size - 1) // page_size  # Ceiling division
+            total_pages = (
+                total_records + page_size - 1
+            ) // page_size  # Ceiling division
             has_next = page < total_pages
             has_prev = page > 1
 
             return {
-                'data': renamed_data.to_dict(orient="records"),
-                'pagination': {
-                    'page': page,
-                    'page_size': page_size,
-                    'total_records': total_records,
-                    'total_pages': total_pages,
-                    'has_next': has_next,
-                    'has_prev': has_prev
-                }
+                "data": renamed_data.to_dict(orient="records"),
+                "pagination": {
+                    "page": page,
+                    "page_size": page_size,
+                    "total_records": total_records,
+                    "total_pages": total_pages,
+                    "has_next": has_next,
+                    "has_prev": has_prev,
+                },
             }
         else:
             return None
@@ -157,11 +188,19 @@ class OnsApiService:
             if dimensions is None:
                 dimensions = [dim["name"] for dim in metadata["dimensions"]]
 
-            dimension_labels = {dim["name"]: dim["label"] for dim in metadata["dimensions"]}
-            value_column = weekly_deaths_data.columns[-1]  # Assuming the value column is the last column
-            selected_columns = [dim for dim in dimensions if dim in weekly_deaths_data.columns] + [value_column]
+            dimension_labels = {
+                dim["name"]: dim["label"] for dim in metadata["dimensions"]
+            }
+            value_column = weekly_deaths_data.columns[
+                -1
+            ]  # Assuming the value column is the last column
+            selected_columns = [
+                dim for dim in dimensions if dim in weekly_deaths_data.columns
+            ] + [value_column]
 
-            renamed_data = weekly_deaths_data[selected_columns].rename(columns={value_column: "Value"})
+            renamed_data = weekly_deaths_data[selected_columns].rename(
+                columns={value_column: "Value"}
+            )
             return renamed_data.to_dict(orient="records")
         else:
             return None
@@ -174,11 +213,19 @@ class OnsApiService:
             if dimensions is None:
                 dimensions = [dim["name"] for dim in metadata["dimensions"]]
 
-            dimension_labels = {dim["name"]: dim["label"] for dim in metadata["dimensions"]}
-            value_column = retail_sales_data.columns[-1]  # Assuming the value column is the last column
-            selected_columns = [dim for dim in dimensions if dim in retail_sales_data.columns] + [value_column]
+            dimension_labels = {
+                dim["name"]: dim["label"] for dim in metadata["dimensions"]
+            }
+            value_column = retail_sales_data.columns[
+                -1
+            ]  # Assuming the value column is the last column
+            selected_columns = [
+                dim for dim in dimensions if dim in retail_sales_data.columns
+            ] + [value_column]
 
-            renamed_data = retail_sales_data[selected_columns].rename(columns={value_column: "Value"})
+            renamed_data = retail_sales_data[selected_columns].rename(
+                columns={value_column: "Value"}
+            )
             return renamed_data.to_dict(orient="records")
         else:
             return None
@@ -191,11 +238,19 @@ class OnsApiService:
             if dimensions is None:
                 dimensions = [dim["name"] for dim in metadata["dimensions"]]
 
-            dimension_labels = {dim["name"]: dim["label"] for dim in metadata["dimensions"]}
-            value_column = tax_benefits_data.columns[-1]  # Assuming the value column is the last column
-            selected_columns = [dim for dim in dimensions if dim in tax_benefits_data.columns] + [value_column]
+            dimension_labels = {
+                dim["name"]: dim["label"] for dim in metadata["dimensions"]
+            }
+            value_column = tax_benefits_data.columns[
+                -1
+            ]  # Assuming the value column is the last column
+            selected_columns = [
+                dim for dim in dimensions if dim in tax_benefits_data.columns
+            ] + [value_column]
 
-            renamed_data = tax_benefits_data[selected_columns].rename(columns={value_column: "Value"})
+            renamed_data = tax_benefits_data[selected_columns].rename(
+                columns={value_column: "Value"}
+            )
             return renamed_data.to_dict(orient="records")
         else:
             return None
@@ -208,11 +263,19 @@ class OnsApiService:
             if dimensions is None:
                 dimensions = [dim["name"] for dim in metadata["dimensions"]]
 
-            dimension_labels = {dim["name"]: dim["label"] for dim in metadata["dimensions"]}
-            value_column = trade_data.columns[-1]  # Assuming the value column is the last column
-            selected_columns = [dim for dim in dimensions if dim in trade_data.columns] + [value_column]
+            dimension_labels = {
+                dim["name"]: dim["label"] for dim in metadata["dimensions"]
+            }
+            value_column = trade_data.columns[
+                -1
+            ]  # Assuming the value column is the last column
+            selected_columns = [
+                dim for dim in dimensions if dim in trade_data.columns
+            ] + [value_column]
 
-            renamed_data = trade_data[selected_columns].rename(columns={value_column: "Value"})
+            renamed_data = trade_data[selected_columns].rename(
+                columns={value_column: "Value"}
+            )
             return renamed_data.to_dict(orient="records")
         else:
             return None
@@ -225,11 +288,19 @@ class OnsApiService:
             if dimensions is None:
                 dimensions = [dim["name"] for dim in metadata["dimensions"]]
 
-            dimension_labels = {dim["name"]: dim["label"] for dim in metadata["dimensions"]}
-            value_column = traffic_camera_data.columns[-1]  # Assuming the value column is the last column
-            selected_columns = [dim for dim in dimensions if dim in traffic_camera_data.columns] + [value_column]
+            dimension_labels = {
+                dim["name"]: dim["label"] for dim in metadata["dimensions"]
+            }
+            value_column = traffic_camera_data.columns[
+                -1
+            ]  # Assuming the value column is the last column
+            selected_columns = [
+                dim for dim in dimensions if dim in traffic_camera_data.columns
+            ] + [value_column]
 
-            renamed_data = traffic_camera_data[selected_columns].rename(columns={value_column: "Value"})
+            renamed_data = traffic_camera_data[selected_columns].rename(
+                columns={value_column: "Value"}
+            )
             return renamed_data.to_dict(orient="records")
         else:
             return None
@@ -242,11 +313,19 @@ class OnsApiService:
             if dimensions is None:
                 dimensions = [dim["name"] for dim in metadata["dimensions"]]
 
-            dimension_labels = {dim["name"]: dim["label"] for dim in metadata["dimensions"]}
-            value_column = sexual_orientation_data.columns[-1]  # Assuming the value column is the last column
-            selected_columns = [dim for dim in dimensions if dim in sexual_orientation_data.columns] + [value_column]
+            dimension_labels = {
+                dim["name"]: dim["label"] for dim in metadata["dimensions"]
+            }
+            value_column = sexual_orientation_data.columns[
+                -1
+            ]  # Assuming the value column is the last column
+            selected_columns = [
+                dim for dim in dimensions if dim in sexual_orientation_data.columns
+            ] + [value_column]
 
-            renamed_data = sexual_orientation_data[selected_columns].rename(columns={value_column: "Value"})
+            renamed_data = sexual_orientation_data[selected_columns].rename(
+                columns={value_column: "Value"}
+            )
             return renamed_data.to_dict(orient="records")
         else:
             return None
@@ -259,11 +338,19 @@ class OnsApiService:
             if dimensions is None:
                 dimensions = [dim["name"] for dim in metadata["dimensions"]]
 
-            dimension_labels = {dim["name"]: dim["label"] for dim in metadata["dimensions"]}
-            value_column = spending_data.columns[-1]  # Assuming the value column is the last column
-            selected_columns = [dim for dim in dimensions if dim in spending_data.columns] + [value_column]
+            dimension_labels = {
+                dim["name"]: dim["label"] for dim in metadata["dimensions"]
+            }
+            value_column = spending_data.columns[
+                -1
+            ]  # Assuming the value column is the last column
+            selected_columns = [
+                dim for dim in dimensions if dim in spending_data.columns
+            ] + [value_column]
 
-            renamed_data = spending_data[selected_columns].rename(columns={value_column: "Value"})
+            renamed_data = spending_data[selected_columns].rename(
+                columns={value_column: "Value"}
+            )
             return renamed_data.to_dict(orient="records")
         else:
             return None

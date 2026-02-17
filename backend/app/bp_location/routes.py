@@ -1,21 +1,26 @@
+from flask import jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+
 from backend.app.services.logging_service.logger import LoggingUtility
-from flask import request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+
 from . import bp_location
 
 logging_utility = LoggingUtility()
 
 
-@bp_location.route('/3vzFLKUZLX9vW7ZmNF0zrVVOxJ4AJPV7x8AKatQMX8KCucDanC5SnfyGexElLPc2GUb60iAQvzOT2NTmnrryCHcW31BekpEduXip', methods=['POST'])
+@bp_location.route(
+    "/3vzFLKUZLX9vW7ZmNF0zrVVOxJ4AJPV7x8AKatQMX8KCucDanC5SnfyGexElLPc2GUb60iAQvzOT2NTmnrryCHcW31BekpEduXip",
+    methods=["POST"],
+)
 @jwt_required()
 def update_current_user_location():
     logging_utility.info("Received request to update current user location")
 
-    authorization_header = request.headers.get('Authorization')
+    authorization_header = request.headers.get("Authorization")
 
     # Log the JWT token
-    if authorization_header and authorization_header.startswith('Bearer '):
-        jwt_token = authorization_header.split('Bearer ')[1].strip()
+    if authorization_header and authorization_header.startswith("Bearer "):
+        jwt_token = authorization_header.split("Bearer ")[1].strip()
         logging_utility.debug("JWT token: %s", jwt_token)
     else:
         jwt_token = None
@@ -31,17 +36,23 @@ def update_current_user_location():
         return jsonify({"msg": "Missing JSON data"}), 400
 
     try:
-        altitude = data['altitude']
-        latitude = data['latitude']
-        location_type = data['locationType']
-        longitude = data['longitude']
-        permission_status = data['permissionStatus']
+        altitude = data["altitude"]
+        latitude = data["latitude"]
+        location_type = data["locationType"]
+        longitude = data["longitude"]
+        permission_status = data["permissionStatus"]
     except KeyError as e:
         logging_utility.error("Invalid JSON data: %s", str(e))
         return jsonify({"msg": "Invalid JSON data"}), 400
 
-    logging_utility.debug("Received location data: altitude=%s, latitude=%s, locationType=%s, longitude=%s, permissionStatus=%s",
-                          altitude, latitude, location_type, longitude, permission_status)
+    logging_utility.debug(
+        "Received location data: altitude=%s, latitude=%s, locationType=%s, longitude=%s, permissionStatus=%s",
+        altitude,
+        latitude,
+        location_type,
+        longitude,
+        permission_status,
+    )
 
     try:
         user_location = UserLocation(
@@ -50,11 +61,13 @@ def update_current_user_location():
             location_type=location_type,
             latitude=latitude,
             longitude=longitude,
-            altitude=altitude
+            altitude=altitude,
         )
         db.session.add(user_location)
         db.session.commit()
-        logging_utility.info("Location updated successfully for user %s", current_user_id)
+        logging_utility.info(
+            "Location updated successfully for user %s", current_user_id
+        )
         return jsonify({"msg": "Location updated successfully"}), 200
     except Exception as e:
         db.session.rollback()

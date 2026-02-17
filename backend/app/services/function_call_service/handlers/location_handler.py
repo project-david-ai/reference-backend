@@ -1,4 +1,5 @@
 from backend.app.services.logging_service.logger import LoggingUtility
+
 logging_utility = LoggingUtility()
 
 
@@ -12,6 +13,6 @@ class LocationHandler:
         return location_info
 
     def fetch_location_info(self, location):
-        self.logging_utility.info('Fetching location information for: %s', location)
+        self.logging_utility.info("Fetching location information for: %s", location)
         # For demonstration purposes, let's simulate a successful API call
         return f"Location: {location}, Country: USA, Population: 2,000,000"

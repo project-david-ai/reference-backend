@@ -5,5 +5,3 @@ import uuid
 def generate_uuid():
     # Generate a UUID and return as a string
     return str(uuid.uuid4())
-
-

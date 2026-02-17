@@ -7,7 +7,7 @@ class IdentifierService:
     def generate_id(prefix: str, length: int = 22) -> str:
         """Generate a prefixed ID with a specified length of random alphanumeric characters."""
         characters = string.ascii_letters + string.digits
-        random_string = ''.join(random.choice(characters) for _ in range(length))
+        random_string = "".join(random.choice(characters) for _ in range(length))
         return f"{prefix}_{random_string}"
 
     @staticmethod

@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
-from backend.app.services.indentity_services.pin_service import PinService
-from backend.app.services.email_services.email_service import EmailService
-from backend.app.models import User, PasswordResetToken
+
 from backend.app.extensions import db
-from backend.app.services.message_services.messages import PASSWORD_RESET_REQUEST, EMAIL_NOT_FOUND
+from backend.app.models import PasswordResetToken, User
+from backend.app.services.email_services.email_service import EmailService
+from backend.app.services.indentity_services.pin_service import PinService
+from backend.app.services.message_services.messages import (
+    EMAIL_NOT_FOUND, PASSWORD_RESET_REQUEST)
 from backend.app.services.twillo_services.twillo_service import send_sms
 
 
@@ -25,20 +27,29 @@ class ResetPasswordService:
             pin = PinService.generate_pin()
             print(pin)
             self.user.password_reset_pin = pin
-            self.user.password_reset_expires_at = datetime.utcnow() + timedelta(seconds=1800)
+            self.user.password_reset_expires_at = datetime.utcnow() + timedelta(
+                seconds=1800
+            )
             db.session.commit()
 
             # Create a password reset token entry in the database
             expiration_date = datetime.utcnow() + timedelta(seconds=1800)
-            password_reset_token = PasswordResetToken(user_id=self.user.id, token=pin, expiration_date=expiration_date)
+            password_reset_token = PasswordResetToken(
+                user_id=self.user.id, token=pin, expiration_date=expiration_date
+            )
             db.session.add(password_reset_token)
             db.session.commit()
 
             print("Updated user with reset PIN and expiry.")
 
             # Send the password reset email
-            reset_url = 'http://example.com/reset-password'  # Replace with your actual reset URL
-            self.email_service.send_password_reset_email(self.user.email, self.user.username, self.user.password_reset_pin, reset_url)
+            reset_url = "http://example.com/reset-password"  # Replace with your actual reset URL
+            self.email_service.send_password_reset_email(
+                self.user.email,
+                self.user.username,
+                self.user.password_reset_pin,
+                reset_url,
+            )
         except Exception as e:
             print(f"An error occurred while creating reset PIN for user: {e}")
 

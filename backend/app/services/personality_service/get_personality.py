@@ -1,8 +1,9 @@
+from backend.app import create_app
 from backend.app.extensions import db
 from backend.app.models import Instruction
-from backend.app import create_app
 
 # Import the Flask application instance
+
 
 def get_personality(ai_entity, personality):
     try:
@@ -15,6 +16,7 @@ def get_personality(ai_entity, personality):
 
     except Exception as e:
         pass  # Handling of the exception can be logged or managed as needed
+
 
 if __name__ == "__main__":
     ai_entity = "Q"

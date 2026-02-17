@@ -1,9 +1,12 @@
-import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
-from backend.app.extensions import db
-from backend.app.models import User, FauxIdentity
+import sys
+
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+)
 from backend.app import create_app
+from backend.app.extensions import db
+from backend.app.models import FauxIdentity, User
 from backend.app.utils.generate_uid import generate_uuid
 
 
@@ -16,8 +19,7 @@ def assign_faux_identities():
             for user in users:
                 if not user.faux_identity:
                     faux_identity = FauxIdentity(
-                        user_id=user.id,
-                        faux_identity=generate_uuid()
+                        user_id=user.id, faux_identity=generate_uuid()
                     )
                     db.session.add(faux_identity)
             db.session.commit()
