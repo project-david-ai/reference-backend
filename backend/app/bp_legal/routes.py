@@ -1,9 +1,11 @@
-from flask import jsonify
 from datetime import datetime
+
+from flask import jsonify
+
 from . import bp_legal
 
 
-@bp_legal.route('/privacy-policy', methods=['GET'])
+@bp_legal.route("/privacy-policy", methods=["GET"])
 def privacy_policy():
     try:
         content = f"""
@@ -66,14 +68,14 @@ def privacy_policy():
         Last Updated: {datetime.utcnow().strftime("%Y-%m-%d")}
         """
 
-        return jsonify({'content': content})
+        return jsonify({"content": content})
 
     except Exception as e:
         print(f"Error in privacy_policy route: {str(e)}")
-        return jsonify({'error': 'Failed to fetch privacy policy content'}), 500
+        return jsonify({"error": "Failed to fetch privacy policy content"}), 500
 
 
-@bp_legal.route('/terms-of-service', methods=['GET'])
+@bp_legal.route("/terms-of-service", methods=["GET"])
 def terms_of_service():
     try:
         content = f"""
@@ -134,8 +136,8 @@ def terms_of_service():
         Last Updated: {datetime.utcnow().strftime("%Y-%m-%d")}
         """
 
-        return jsonify({'content': content})
+        return jsonify({"content": content})
 
     except Exception as e:
         print(f"Error in terms_of_service route: {str(e)}")
-        return jsonify({'error': 'Failed to fetch terms of service content'}), 500
+        return jsonify({"error": "Failed to fetch terms of service content"}), 500

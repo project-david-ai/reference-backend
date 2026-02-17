@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask_login import login_user, current_user
+from flask_login import current_user, login_user
 from werkzeug.security import check_password_hash
 
 from backend.app.models import User
@@ -15,7 +15,9 @@ class LoginService:
         self.current_user = current_user
         self.user = None
         self.redirect_url = None
-        print(f"LoginService initialized with current_user: {current_user} and session: {session}")
+        print(
+            f"LoginService initialized with current_user: {current_user} and session: {session}"
+        )
 
     def _load_user_from_db(self, email):
         print(f"Attempting to load user with email: {email}")
@@ -50,14 +52,14 @@ class LoginService:
         print(f"Processing login request for user: {data.get('email', 'None')}")
         if current_user.is_authenticated:
             print("User is already authenticated, redirecting to dashboard.")
-            self.redirect_url = 'http://127.0.0.1:3000/q-composer'
+            self.redirect_url = "http://127.0.0.1:3000/q-composer"
             return {"redirect_url": self.redirect_url}
 
         # Here, you would replace form validation with checking data presence
         if data:
-            email = data.get('email')
-            password = data.get('password')
-            remember = data.get('remember', False)
+            email = data.get("email")
+            password = data.get("password")
+            remember = data.get("remember", False)
 
             self._load_user_from_db(email)
 
@@ -73,7 +75,7 @@ class LoginService:
             else:
                 login_user(self.user, remember=remember)
                 self._set_last_login()
-                self.redirect_url = 'http://127.0.0.1:3000/q-composer'
+                self.redirect_url = "http://127.0.0.1:3000/q-composer"
         else:
             print("No data received.")
 

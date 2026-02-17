@@ -16,7 +16,7 @@ class PinService:
         Returns:
             str: A randomly generated PIN.
         """
-        return ''.join(random.choices(string.digits, k=length))
+        return "".join(random.choices(string.digits, k=length))
 
     @staticmethod
     def is_pin_expired(expiry_time):
@@ -42,4 +42,5 @@ class PinService:
             bool: True if the PIN is valid, else False.
         """
         return self.user.password_reset_pin == provided_pin and not self.is_pin_expired(
-            self.user.password_reset_expires_at)
+            self.user.password_reset_expires_at
+        )

@@ -1,8 +1,10 @@
 from openai import OpenAI
 
 # Initialize the OpenAI client
-client = OpenAI(default_headers={"OpenAI-Beta": "assistants=v2"},
-                api_key='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')
+client = OpenAI(
+    default_headers={"OpenAI-Beta": "assistants=v2"},
+    api_key="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",
+)
 
 
 def list_vector_stores_paginated(client, limit=100):
@@ -11,7 +13,7 @@ def list_vector_stores_paginated(client, limit=100):
 
     while response:
         # Process the current page of results
-        vector_stores = response.dict().get('data', [])
+        vector_stores = response.dict().get("data", [])
 
         for store in vector_stores:
             print(f"Vector Store ID: {store['id']} | Created At: {store['created_at']}")

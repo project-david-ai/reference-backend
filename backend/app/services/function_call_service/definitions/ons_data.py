@@ -11,15 +11,13 @@ ons_data_functions = [
                 "properties": {
                     "dimensions": {
                         "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "description": "The dimensions to include in the response (e.g., 'time', 'geography', 'estimate', 'measureofwellbeing'). If not provided, all dimensions will be included."
+                        "items": {"type": "string"},
+                        "description": "The dimensions to include in the response (e.g., 'time', 'geography', 'estimate', 'measureofwellbeing'). If not provided, all dimensions will be included.",
                     }
                 },
-                "required": []
-            }
-        }
+                "required": [],
+            },
+        },
     },
     {
         "type": "function",
@@ -31,15 +29,13 @@ ons_data_functions = [
                 "properties": {
                     "dimensions": {
                         "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "description": "The dimensions to include in the response (e.g., 'time', 'age', 'sex', 'sexualorientation'). If not provided, all dimensions will be included."
+                        "items": {"type": "string"},
+                        "description": "The dimensions to include in the response (e.g., 'time', 'age', 'sex', 'sexualorientation'). If not provided, all dimensions will be included.",
                     }
                 },
-                "required": []
-            }
-        }
+                "required": [],
+            },
+        },
     },
     {
         "type": "function",
@@ -51,15 +47,13 @@ ons_data_functions = [
                 "properties": {
                     "dimensions": {
                         "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "description": "The dimensions to include in the response (e.g., 'time', 'geography', 'unofficialstandardindustrialclassification', 'prices', 'seasonaladjustment'). If not provided, all dimensions will be included."
+                        "items": {"type": "string"},
+                        "description": "The dimensions to include in the response (e.g., 'time', 'geography', 'unofficialstandardindustrialclassification', 'prices', 'seasonaladjustment'). If not provided, all dimensions will be included.",
                     }
                 },
-                "required": []
-            }
-        }
+                "required": [],
+            },
+        },
     },
     {
         "type": "function",
@@ -71,14 +65,12 @@ ons_data_functions = [
                 "properties": {
                     "dimensions": {
                         "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "description": "The dimensions to include in the response (e.g., 'time', 'geography', 'quintile', 'averagesandpercentiles', 'income', 'deflation'). If not provided, all dimensions will be included."
+                        "items": {"type": "string"},
+                        "description": "The dimensions to include in the response (e.g., 'time', 'geography', 'quintile', 'averagesandpercentiles', 'income', 'deflation'). If not provided, all dimensions will be included.",
                     }
                 },
-                "required": []
-            }
-        }
-    }
+                "required": [],
+            },
+        },
+    },
 ]

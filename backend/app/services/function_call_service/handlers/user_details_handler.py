@@ -1,4 +1,5 @@
-from backend.app.services.api_service_internal.project_david.user_details_service import UserDetailsService
+from backend.app.services.api_service_internal.project_david.user_details_service import \
+    UserDetailsService
 from backend.app.services.logging_service.logger import LoggingUtility
 
 
@@ -10,11 +11,13 @@ class UserDetailsHandler:
         self.logging_utility = LoggingUtility()
 
     def handle_get_user_details_by_faux_identity(self, arguments):
-        self.logging_utility.info('Retrieving user details by faux identity')
+        self.logging_utility.info("Retrieving user details by faux identity")
         faux_identity = arguments.get("faux_identity", None)
 
         if faux_identity:
-            user_details = self.user_details_service.get_user_details_by_faux_identity(faux_identity)
+            user_details = self.user_details_service.get_user_details_by_faux_identity(
+                faux_identity
+            )
 
             if user_details:
                 response = "User Details:\n\n"
@@ -27,10 +30,13 @@ class UserDetailsHandler:
                 response += f"Faux Identity: {user_details.get('faux_identity', '')}\n"
                 response += "---\n"
             else:
-                self.logging_utility.warning('Failed to retrieve user details for faux identity: %s', faux_identity)
+                self.logging_utility.warning(
+                    "Failed to retrieve user details for faux identity: %s",
+                    faux_identity,
+                )
                 response = f"Failed to retrieve user details for faux identity: {faux_identity}"
         else:
-            self.logging_utility.warning('Faux identity not provided')
+            self.logging_utility.warning("Faux identity not provided")
             response = "Faux identity not provided."
 
         return response

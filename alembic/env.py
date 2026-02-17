@@ -1,12 +1,15 @@
-from logging.config import fileConfig
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from alembic import context
 import os
 import sys
+from logging.config import fileConfig
+
+from sqlalchemy import engine_from_config, pool
+
+from alembic import context
 
 # Ensure that the application's package is on the path
-sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.insert(
+    0, os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
+)
 
 # Import the application's create_app function and models
 from backend.app import create_app
@@ -20,12 +23,13 @@ config = context.config
 fileConfig(config.config_file_name)
 
 # Set up the Flask app and get the SQLALCHEMY_DATABASE_URI from the Flask config
-flask_app = create_app(os.getenv('FLASK_CONFIG') or 'default')
-database_url = flask_app.config['SQLALCHEMY_DATABASE_URI']
-config.set_main_option('sqlalchemy.url', database_url)
+flask_app = create_app(os.getenv("FLASK_CONFIG") or "default")
+database_url = flask_app.config["SQLALCHEMY_DATABASE_URI"]
+config.set_main_option("sqlalchemy.url", database_url)
 
 # Add your model's MetaData object here for 'autogenerate' support
 target_metadata = db.metadata
+
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
@@ -44,13 +48,14 @@ def run_migrations_offline():
     with context.begin_transaction():
         context.run_migrations()
 
+
 def run_migrations_online():
     """Run migrations in 'online' mode.
     In this scenario we need to create an Engine and associate a connection with the context.
     """
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
-        prefix='sqlalchemy.',
+        prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
 
@@ -63,6 +68,7 @@ def run_migrations_online():
 
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

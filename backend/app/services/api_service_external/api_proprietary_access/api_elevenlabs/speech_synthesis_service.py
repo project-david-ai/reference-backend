@@ -2,12 +2,14 @@ import os
 import time
 import uuid
 from io import BytesIO
-from dotenv import load_dotenv
+
 import requests
+from dotenv import load_dotenv
 from elevenlabs import VoiceSettings
 from elevenlabs.client import ElevenLabs
 
-from backend.app.services.google_services.upload_files_to_gcs_service.gcs_upload_service import GCSUploadService
+from backend.app.services.google_services.upload_files_to_gcs_service.gcs_upload_service import \
+    GCSUploadService
 from backend.app.services.logging_service.logger import LoggingUtility
 
 # Create an instance of the LoggingUtility class
@@ -21,7 +23,9 @@ class ElevenSpeechSynthesisService:
             raise ValueError("ELEVENLABS_API_KEY environment variable not set")
         self.client = ElevenLabs(api_key=self.api_key)
 
-    def text_to_speech_file(self, text: str, user_id: str, thread_id: str, message_id: str, voice_id: str) -> str:
+    def text_to_speech_file(
+        self, text: str, user_id: str, thread_id: str, message_id: str, voice_id: str
+    ) -> str:
         """
         Converts text to speech and saves the output as an MP3 file to a Google Cloud Storage bucket.
         This function uses the ElevenLabs client for text-to-speech conversion.
@@ -67,13 +71,19 @@ class ElevenSpeechSynthesisService:
 
             # Upload the speech file to GCS
             gcs_upload_service = GCSUploadService(bucket_name="q_speech_retrieval")
-            public_url = gcs_upload_service.upload_speech_file(audio_buffer, user_id, thread_id, message_id)
-            logging_utility.info("Speech file uploaded to GCS with public URL: %s", public_url)
+            public_url = gcs_upload_service.upload_speech_file(
+                audio_buffer, user_id, thread_id, message_id
+            )
+            logging_utility.info(
+                "Speech file uploaded to GCS with public URL: %s", public_url
+            )
 
             return public_url
 
         except Exception as e:
-            logging_utility.error("An error occurred while generating speech: %s", str(e))
+            logging_utility.error(
+                "An error occurred while generating speech: %s", str(e)
+            )
             raise
 
     def get_available_voices(self):
@@ -87,13 +97,13 @@ class ElevenSpeechSynthesisService:
         headers = {
             "Accept": "application/json",
             "xi-api-key": self.api_key,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         response = requests.get(url, headers=headers)
         data = response.json()
 
-        return data['voices']
+        return data["voices"]
 
 
 if __name__ == "__main__":
@@ -103,5 +113,5 @@ if __name__ == "__main__":
     user_id = "user123"
     thread_id = "thread456"
     message_id = "msg789"
-    #service.text_to_speech_file(text, user_id, thread_id, message_id)
-    print (service.get_available_voices())
+    # service.text_to_speech_file(text, user_id, thread_id, message_id)
+    print(service.get_available_voices())

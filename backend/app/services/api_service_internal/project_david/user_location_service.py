@@ -9,38 +9,51 @@ logging_utility = LoggingUtility()
 class UserLocationService:
     def __init__(self):
         pass
+
     def get_user_locations(self, faux_identity, limit=None):
         app = create_app()
 
         with app.app_context():
-            faux_identity_record = FauxIdentity.query.filter_by(faux_identity=faux_identity).first()
+            faux_identity_record = FauxIdentity.query.filter_by(
+                faux_identity=faux_identity
+            ).first()
             if faux_identity_record:
                 real_user_id = faux_identity_record.user_id
                 with db.session.no_autoflush:
                     user = db.session.get(User, real_user_id)
                 if user:
-                    query = UserLocation.query.filter_by(user_id=real_user_id).order_by(UserLocation.timestamp.desc())
+                    query = UserLocation.query.filter_by(user_id=real_user_id).order_by(
+                        UserLocation.timestamp.desc()
+                    )
                     if limit:
                         query = query.limit(limit)
                     user_locations = [
                         {
-                            'id': location.id,
-                            'permission_status': location.permission_status,
-                            'location_type': location.location_type,
-                            'latitude': location.latitude,
-                            'longitude': location.longitude,
-                            'timestamp': location.timestamp.isoformat(),
+                            "id": location.id,
+                            "permission_status": location.permission_status,
+                            "location_type": location.location_type,
+                            "latitude": location.latitude,
+                            "longitude": location.longitude,
+                            "timestamp": location.timestamp.isoformat(),
                         }
                         for location in query.all()
                     ]
                     if user_locations:
-                        logging_utility.info("User locations retrieved successfully for faux identity: %s", faux_identity)
+                        logging_utility.info(
+                            "User locations retrieved successfully for faux identity: %s",
+                            faux_identity,
+                        )
                         return user_locations
                     else:
-                        logging_utility.error("No location found for user with faux identity %s", faux_identity)
+                        logging_utility.error(
+                            "No location found for user with faux identity %s",
+                            faux_identity,
+                        )
                         return []
                 else:
-                    logging_utility.error("User not found for faux identity %s", faux_identity)
+                    logging_utility.error(
+                        "User not found for faux identity %s", faux_identity
+                    )
                     return []
             else:
                 logging_utility.error("Faux identity not found: %s", faux_identity)
@@ -48,7 +61,9 @@ class UserLocationService:
 
 
 if __name__ == "__main__":
-    faux_identity = '6bd0041a-0f68-439c-a054-9b735142982c'  # Replace with the desired faux identity
+    faux_identity = (
+        "6bd0041a-0f68-439c-a054-9b735142982c"  # Replace with the desired faux identity
+    )
     limit = 3  # Limit the number of user locations to retrieve
 
     service = UserLocationService()

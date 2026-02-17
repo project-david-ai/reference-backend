@@ -1,6 +1,5 @@
 import pprint
 
-
 from projectdavid import Entity
 
 # Full integration test
@@ -17,7 +16,7 @@ if __name__ == "__main__":
         thread_id=thread.id,
         role="user",
         content="Hello, this is a test!",
-        assistant_id=assistant.id
+        assistant_id=assistant.id,
     )
 
     run = entities_client.run_service.create_run(
@@ -34,13 +33,15 @@ if __name__ == "__main__":
         thread_id=thread.id,
         assistant_id=assistant.id,
         message_id=message.id,
-        run_id=run.id
+        run_id=run.id,
     )
 
     # Step 5: Stream and process inference results in real time
     print("Starting real-time streaming output...")
     try:
-        for chunk in sync_stream.stream_chunks(provider="Hyperbolic", model="hyperbolic/deepseek-ai/DeepSeek-V3"):
+        for chunk in sync_stream.stream_chunks(
+            provider="Hyperbolic", model="hyperbolic/deepseek-ai/DeepSeek-V3"
+        ):
             print("Received chunk:")
             pprint.pprint(chunk)
     finally:

@@ -1,10 +1,16 @@
-import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..')))
+import sys
+
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+)
+from personality_design import (artistic_personality, educational_personality,
+                                general_base_personality,
+                                scientific_technological_personality)
+
+from backend.app import create_app
 from backend.app.extensions import db
 from backend.app.models import Instruction
-from backend.app import create_app
-from personality_design import educational_personality, general_base_personality, scientific_technological_personality, artistic_personality
 
 
 def update_personality_data(ai_entity, personality_data):
@@ -17,12 +23,15 @@ def update_personality_data(ai_entity, personality_data):
             if instruction:
                 instruction.personality_data = personality_data
                 db.session.commit()
-                print(f"Personality data updated successfully for AI entity: {ai_entity}")
+                print(
+                    f"Personality data updated successfully for AI entity: {ai_entity}"
+                )
             else:
                 print(f"No instruction found for AI entity: {ai_entity}")
     except Exception as e:
         print(f"An error occurred while updating personality data: {str(e)}")
         db.session.rollback()
+
 
 # Example usage
 
@@ -35,7 +44,7 @@ personality_data = {
     "general_base_personality": general_base_personality,
     "scientific_technological_personality": scientific_technological_personality,
     "educational_personality": educational_personality,
-    "artistic_personality": artistic_personality
+    "artistic_personality": artistic_personality,
 }
 
 if __name__ == "__main__":

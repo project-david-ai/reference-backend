@@ -8,7 +8,8 @@ from openai import OpenAI
 from pydub import AudioSegment
 from pydub.effects import speedup
 
-from backend.app.services.google_services.upload_files_to_gcs_service.gcs_upload_service import GCSUploadService
+from backend.app.services.google_services.upload_files_to_gcs_service.gcs_upload_service import \
+    GCSUploadService
 from backend.app.services.logging_service.logger import LoggingUtility
 
 # Create an instance of the LoggingUtility class
@@ -24,16 +25,16 @@ class SpeechSynthesisService:
 
     def chunk_text(self, text, length=4096):
         # Split text into chunks of 'length' characters each
-        text = re.sub(r'\s+', ' ', text)  # Replace multiple whitespace with a single space
-        chunks = [text[i:i + length] for i in range(0, len(text), length)]
+        text = re.sub(
+            r"\s+", " ", text
+        )  # Replace multiple whitespace with a single space
+        chunks = [text[i : i + length] for i in range(0, len(text), length)]
         return chunks
 
     def generate_speech_for_chunk(self, text_chunk):
         # Generate speech using OpenAI's API for a single chunk of text
         response = self.client.audio.speech.create(
-            model="tts-1-hd",
-            voice=self.voice,
-            input=text_chunk
+            model="tts-1-hd", voice=self.voice, input=text_chunk
         )
         audio_bytes = response.read()
         audio = AudioSegment.from_file(BytesIO(audio_bytes), format="mp3")
@@ -41,8 +42,10 @@ class SpeechSynthesisService:
 
     def adjust_audio_properties(self, audio):
         # Apply pitch shift
-        new_sample_rate = int(audio.frame_rate * (2.0 ** self.pitch))
-        lowpitch_audio = audio._spawn(audio.raw_data, overrides={'frame_rate': new_sample_rate})
+        new_sample_rate = int(audio.frame_rate * (2.0**self.pitch))
+        lowpitch_audio = audio._spawn(
+            audio.raw_data, overrides={"frame_rate": new_sample_rate}
+        )
         lowpitch_audio = lowpitch_audio.set_frame_rate(audio.frame_rate)
 
         # Apply speed modification
@@ -73,14 +76,21 @@ class SpeechSynthesisService:
 
             # Step 4: Upload the speech file to GCS
             gcs_upload_service = GCSUploadService(bucket_name="q_speech_retrieval")
-            public_url = gcs_upload_service.upload_speech_file(adjusted_audio_buffer, user_id, thread_id, message_id)
-            logging_utility.info("Speech file uploaded to GCS with public URL: %s", public_url)
+            public_url = gcs_upload_service.upload_speech_file(
+                adjusted_audio_buffer, user_id, thread_id, message_id
+            )
+            logging_utility.info(
+                "Speech file uploaded to GCS with public URL: %s", public_url
+            )
 
             return public_url
 
         except Exception as e:
-            logging_utility.error("An error occurred while generating speech: %s", str(e))
+            logging_utility.error(
+                "An error occurred while generating speech: %s", str(e)
+            )
             return None
+
 
 if __name__ == "__main__":
     load_dotenv()
@@ -89,4 +99,9 @@ if __name__ == "__main__":
     user_id = "user123"
     thread_id = "thread456"
     message_id = "msg789"
-    service.generate_speech("You will give the people of Earth an ideal to strive towards. They will race behind you, they will stumble, they will fall. But in time, they will join you in the sun, Kal. In time, you will help them accomplish wonders.", user_id, thread_id, message_id)
+    service.generate_speech(
+        "You will give the people of Earth an ideal to strive towards. They will race behind you, they will stumble, they will fall. But in time, they will join you in the sun, Kal. In time, you will help them accomplish wonders.",
+        user_id,
+        thread_id,
+        message_id,
+    )

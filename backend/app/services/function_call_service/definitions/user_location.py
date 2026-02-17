@@ -9,15 +9,15 @@ user_location_functions = [
                 "properties": {
                     "faux_identity": {
                         "type": "string",
-                        "description": "The faux identity of the user"
+                        "description": "The faux identity of the user",
                     },
                     "limit": {
                         "type": "integer",
-                        "description": "The maximum number of user locations to retrieve (optional)"
-                    }
+                        "description": "The maximum number of user locations to retrieve (optional)",
+                    },
                 },
-                "required": ["faux_identity"]
-            }
-        }
+                "required": ["faux_identity"],
+            },
+        },
     }
 ]

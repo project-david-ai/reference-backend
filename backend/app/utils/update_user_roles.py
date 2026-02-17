@@ -1,11 +1,13 @@
-import sys
 import os
+import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+)
 
+from backend.app import create_app
 from backend.app.extensions import db
 from backend.app.models import User
-from backend.app import create_app
 
 
 def update_user_roles():
@@ -16,7 +18,7 @@ def update_user_roles():
             # Update all users with the default role of 'user'
             users = User.query.all()
             for user in users:
-                user.role = 'user'
+                user.role = "user"
             db.session.commit()
             print("User roles updated successfully.")
     except Exception as e:

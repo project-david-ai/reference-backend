@@ -11,9 +11,9 @@ def str_to_bool(s):
     Raises:
     ValueError: If the input string is neither 'True' nor 'False'.
     """
-    if s == 'True':
-         return True
-    elif s == 'False':
-         return False
+    if s == "True":
+        return True
+    elif s == "False":
+        return False
     else:
-         raise ValueError('Invalid value for boolean conversion')
+        raise ValueError("Invalid value for boolean conversion")

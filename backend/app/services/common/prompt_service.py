@@ -1,6 +1,6 @@
 class PromptService:
     def __init__(self, name=None):
-        self.builder_username = 'thanos'
+        self.builder_username = "thanos"
         self.name = name
 
     def drone_prompt_sumarise_message(self, data):

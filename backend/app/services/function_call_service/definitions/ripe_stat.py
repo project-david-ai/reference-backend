@@ -11,24 +11,24 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The ASN for which to retrieve the announced prefixes"
+                        "description": "The ASN for which to retrieve the announced prefixes",
                     },
                     "starttime": {
                         "type": "string",
-                        "description": "The start time for the query (ISO8601 or Unix timestamp)"
+                        "description": "The start time for the query (ISO8601 or Unix timestamp)",
                     },
                     "endtime": {
                         "type": "string",
-                        "description": "The end time for the query (ISO8601 or Unix timestamp)"
+                        "description": "The end time for the query (ISO8601 or Unix timestamp)",
                     },
                     "min_peers_seeing": {
                         "type": "integer",
-                        "description": "Minimum number of RIS peers seeing the prefix for it to be included in the results"
-                    }
+                        "description": "Minimum number of RIS peers seeing the prefix for it to be included in the results",
+                    },
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
@@ -40,12 +40,12 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The IP prefix or range for which to retrieve abuse contact information (e.g., '193.0.0.0/21')"
+                        "description": "The IP prefix or range for which to retrieve abuse contact information (e.g., '193.0.0.0/21')",
                     }
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
@@ -57,16 +57,16 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The IP prefix or range for which to retrieve the address space usage (e.g., '193.0.0.0/23')"
+                        "description": "The IP prefix or range for which to retrieve the address space usage (e.g., '193.0.0.0/23')",
                     },
                     "all_level_more_specifics": {
                         "type": "boolean",
-                        "description": "Indicates whether to return all levels (True) or only the first level (False) of more-specific resources"
-                    }
+                        "description": "Indicates whether to return all levels (True) or only the first level (False) of more-specific resources",
+                    },
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
@@ -78,20 +78,20 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The prefix, IP range, or ASN for which to retrieve the allocation history"
+                        "description": "The prefix, IP range, or ASN for which to retrieve the allocation history",
                     },
                     "starttime": {
                         "type": "string",
-                        "description": "The start time for the query (ISO8601 or Unix timestamp)"
+                        "description": "The start time for the query (ISO8601 or Unix timestamp)",
                     },
                     "endtime": {
                         "type": "string",
-                        "description": "The end time for the query (ISO8601 or Unix timestamp)"
-                    }
+                        "description": "The end time for the query (ISO8601 or Unix timestamp)",
+                    },
                 },
-                "required": ["resource", "starttime"]
-            }
-        }
+                "required": ["resource", "starttime"],
+            },
+        },
     },
     {
         "type": "function",
@@ -103,16 +103,16 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The ASN for which to retrieve the neighbours"
+                        "description": "The ASN for which to retrieve the neighbours",
                     },
                     "starttime": {
                         "type": "string",
-                        "description": "The start time for the query (ISO8601 or Unix timestamp)"
-                    }
+                        "description": "The start time for the query (ISO8601 or Unix timestamp)",
+                    },
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
@@ -124,12 +124,12 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The prefix, network (ASN), or country for which to retrieve the Atlas probes"
+                        "description": "The prefix, network (ASN), or country for which to retrieve the Atlas probes",
                     }
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
@@ -141,28 +141,28 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The prefix, IP address, AS, or a list of valid comma-separated resources for which to retrieve the BGP updates"
+                        "description": "The prefix, IP address, AS, or a list of valid comma-separated resources for which to retrieve the BGP updates",
                     },
                     "starttime": {
                         "type": "string",
-                        "description": "The start time for the query (ISO8601 or Unix timestamp)"
+                        "description": "The start time for the query (ISO8601 or Unix timestamp)",
                     },
                     "endtime": {
                         "type": "string",
-                        "description": "The end time for the query (ISO8601 or Unix timestamp)"
+                        "description": "The end time for the query (ISO8601 or Unix timestamp)",
                     },
                     "rrcs": {
                         "type": "string",
-                        "description": "The list of Route Collectors (RRCs) to get the results from (single value or comma-separated values)"
+                        "description": "The list of Route Collectors (RRCs) to get the results from (single value or comma-separated values)",
                     },
                     "unix_timestamps": {
                         "type": "boolean",
-                        "description": "Indicates whether to format the timestamps in the result as Unix timestamps"
-                    }
+                        "description": "Indicates whether to format the timestamps in the result as Unix timestamps",
+                    },
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
@@ -174,24 +174,24 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The ASN for which to retrieve the neighbours history"
+                        "description": "The ASN for which to retrieve the neighbours history",
                     },
                     "starttime": {
                         "type": "string",
-                        "description": "The start time for the query (ISO8601 or Unix timestamp)"
+                        "description": "The start time for the query (ISO8601 or Unix timestamp)",
                     },
                     "endtime": {
                         "type": "string",
-                        "description": "The end time for the query (ISO8601 or Unix timestamp)"
+                        "description": "The end time for the query (ISO8601 or Unix timestamp)",
                     },
                     "max_rows": {
                         "type": "integer",
-                        "description": "The maximum number of neighbours to include in the result"
-                    }
+                        "description": "The maximum number of neighbours to include in the result",
+                    },
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
@@ -203,24 +203,24 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The 2-digit ISO-3166 country code (e.g., 'at', 'de')"
+                        "description": "The 2-digit ISO-3166 country code (e.g., 'at', 'de')",
                     },
                     "starttime": {
                         "type": "string",
-                        "description": "The start time for the query (ISO8601 or Unix timestamp)"
+                        "description": "The start time for the query (ISO8601 or Unix timestamp)",
                     },
                     "endtime": {
                         "type": "string",
-                        "description": "The end time for the query (ISO8601 or Unix timestamp)"
+                        "description": "The end time for the query (ISO8601 or Unix timestamp)",
                     },
                     "resolution": {
                         "type": "string",
-                        "description": "The resolution for the data ('5m', '1h', '1d', '1w')"
-                    }
+                        "description": "The resolution for the data ('5m', '1h', '1d', '1w')",
+                    },
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
@@ -232,20 +232,20 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The 2-digit ISO-3166 country code (e.g., 'at', 'de')"
+                        "description": "The 2-digit ISO-3166 country code (e.g., 'at', 'de')",
                     },
                     "time": {
                         "type": "string",
-                        "description": "The time to query (ISO8601 or Unix timestamp)"
+                        "description": "The time to query (ISO8601 or Unix timestamp)",
                     },
                     "v4_format": {
                         "type": "string",
-                        "description": "The formatting for the output of IPv4 space ('prefix' or '')"
-                    }
+                        "description": "The formatting for the output of IPv4 space ('prefix' or '')",
+                    },
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
@@ -257,24 +257,20 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The hostname or IP address (IPv4 or IPv6)"
+                        "description": "The hostname or IP address (IPv4 or IPv6)",
                     }
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
         "function": {
             "name": "getExampleResources",
             "description": "Retrieves example resources for ASN, IPv4, and IPv6",
-            "parameters": {
-                "type": "object",
-                "properties": {},
-                "required": []
-            }
-        }
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        },
     },
     {
         "type": "function",
@@ -286,16 +282,16 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The resource to query (prefix, AS number, or object type and key)"
+                        "description": "The resource to query (prefix, AS number, or object type and key)",
                     },
                     "version": {
                         "type": "string",
-                        "description": "The version to load details for (numerical value or time-based value)"
-                    }
+                        "description": "The version to load details for (numerical value or time-based value)",
+                    },
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
@@ -307,24 +303,24 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The prefix, IP address, or AS number"
+                        "description": "The prefix, IP address, or AS number",
                     },
                     "starttime": {
                         "type": "string",
-                        "description": "The start time for the query (ISO8601 or Unix timestamp)"
+                        "description": "The start time for the query (ISO8601 or Unix timestamp)",
                     },
                     "endtime": {
                         "type": "string",
-                        "description": "The end time for the query (ISO8601 or Unix timestamp)"
+                        "description": "The end time for the query (ISO8601 or Unix timestamp)",
                     },
                     "min_peers": {
                         "type": "integer",
-                        "description": "The minimum number of full-feed RIS peers seeing the route for the segment to be included"
-                    }
+                        "description": "The minimum number of full-feed RIS peers seeing the route for the segment to be included",
+                    },
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
@@ -336,32 +332,28 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The prefix, IP address, or AS number"
+                        "description": "The prefix, IP address, or AS number",
                     },
                     "timestamp": {
                         "type": "string",
-                        "description": "The time for the lookup (ISO8601 or Unix timestamp)"
+                        "description": "The time for the lookup (ISO8601 or Unix timestamp)",
                     },
                     "min_peers_seeing": {
                         "type": "integer",
-                        "description": "The minimum number of peers seeing the route for it to be included"
-                    }
+                        "description": "The minimum number of peers seeing the route for it to be included",
+                    },
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
         "function": {
             "name": "getRrcInfo",
             "description": "Retrieves information about the collector nodes (RRCs) of the RIS network",
-            "parameters": {
-                "type": "object",
-                "properties": {},
-                "required": []
-            }
-        }
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        },
     },
     {
         "type": "function",
@@ -373,16 +365,16 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The ASN used to perform the RPKI validity state lookup"
+                        "description": "The ASN used to perform the RPKI validity state lookup",
                     },
                     "prefix": {
                         "type": "string",
-                        "description": "The prefix or comma-separated list of prefixes to perform the RPKI validity state lookup"
-                    }
+                        "description": "The prefix or comma-separated list of prefixes to perform the RPKI validity state lookup",
+                    },
                 },
-                "required": ["resource", "prefix"]
-            }
-        }
+                "required": ["resource", "prefix"],
+            },
+        },
     },
     {
         "type": "function",
@@ -394,24 +386,24 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The prefix, ASN, 2-digit ISO-3166 country code, or trust anchor to query for"
+                        "description": "The prefix, ASN, 2-digit ISO-3166 country code, or trust anchor to query for",
                     },
                     "family": {
                         "type": "integer",
-                        "description": "The IP address family to filter for (4 or 6)"
+                        "description": "The IP address family to filter for (4 or 6)",
                     },
                     "resolution": {
                         "type": "string",
-                        "description": "The time bin to group the result by ('d', 'w', 'm', 'y')"
+                        "description": "The time bin to group the result by ('d', 'w', 'm', 'y')",
                     },
                     "delegated": {
                         "type": "boolean",
-                        "description": "Indicates whether to include registration information for the resource"
-                    }
+                        "description": "Indicates whether to include registration information for the resource",
+                    },
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
@@ -423,16 +415,16 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The term that should be tried to be matched against resources"
+                        "description": "The term that should be tried to be matched against resources",
                     },
                     "limit": {
                         "type": "integer",
-                        "description": "The maximum number of suggestions to return per category"
-                    }
+                        "description": "The maximum number of suggestions to return per category",
+                    },
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
@@ -444,24 +436,20 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The prefix or IP range to retrieve Looking Glass information for"
+                        "description": "The prefix or IP range to retrieve Looking Glass information for",
                     }
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
         "function": {
             "name": "getWhatsMyIp",
             "description": "Retrieves the IP address of the requestor",
-            "parameters": {
-                "type": "object",
-                "properties": {},
-                "required": []
-            }
-        }
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        },
     },
     {
         "type": "function",
@@ -473,12 +461,12 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The hostname to retrieve Zonemaster overview information for"
+                        "description": "The hostname to retrieve Zonemaster overview information for",
                     }
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
@@ -490,12 +478,12 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The ID of the Zonemaster test to retrieve details for"
+                        "description": "The ID of the Zonemaster test to retrieve details for",
                     }
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
@@ -507,20 +495,20 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The IPv4 prefix, IPv4 address, or 2-digit ISO-3166 country code to retrieve bandwidth measurements for"
+                        "description": "The IPv4 prefix, IPv4 address, or 2-digit ISO-3166 country code to retrieve bandwidth measurements for",
                     },
                     "starttime": {
                         "type": "string",
-                        "description": "The start time for the query (ISO8601 or Unix timestamp)"
+                        "description": "The start time for the query (ISO8601 or Unix timestamp)",
                     },
                     "endtime": {
                         "type": "string",
-                        "description": "The end time for the query (ISO8601 or Unix timestamp)"
-                    }
+                        "description": "The end time for the query (ISO8601 or Unix timestamp)",
+                    },
                 },
-                "required": ["resource"]
-            }
-        }
+                "required": ["resource"],
+            },
+        },
     },
     {
         "type": "function",
@@ -532,21 +520,19 @@ ripe_stats_functions = [
                 "properties": {
                     "resource": {
                         "type": "string",
-                        "description": "The IPv4 prefix, IPv4 address, or 2-digit ISO-3166 country code to retrieve client information for"
+                        "description": "The IPv4 prefix, IPv4 address, or 2-digit ISO-3166 country code to retrieve client information for",
                     },
                     "starttime": {
                         "type": "string",
-                        "description": "The start time for the query (ISO8601 or Unix timestamp)"
+                        "description": "The start time for the query (ISO8601 or Unix timestamp)",
                     },
                     "endtime": {
                         "type": "string",
-                        "description": "The end time for the query (ISO8601 or Unix timestamp)"
-                    }
+                        "description": "The end time for the query (ISO8601 or Unix timestamp)",
+                    },
                 },
-                "required": ["resource"]
-            }
-        }
-    }
-
+                "required": ["resource"],
+            },
+        },
+    },
 ]
-

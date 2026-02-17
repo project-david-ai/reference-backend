@@ -20,14 +20,16 @@ dataset_data = get_dataset_data()
 # Process the dataset data
 if dataset_data:
     # Access the 'items' key in the JSON response
-    dataset_items = dataset_data.get('items', [])
+    dataset_items = dataset_data.get("items", [])
 
     # Iterate over each dataset item and print its details
     for item in dataset_items:
-        print("Dataset ID:", item.get('id'))
-        print("Dataset Title:", item.get('title'))
-        print("Dataset Description:", item.get('description'))
-        print("Dataset URL:", item.get('links', {}).get('latest_version', {}).get('href'))
+        print("Dataset ID:", item.get("id"))
+        print("Dataset Title:", item.get("title"))
+        print("Dataset Description:", item.get("description"))
+        print(
+            "Dataset URL:", item.get("links", {}).get("latest_version", {}).get("href")
+        )
         print("---")
 else:
     print("Failed to retrieve dataset data.")
