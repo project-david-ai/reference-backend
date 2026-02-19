@@ -1,5 +1,8 @@
 import json
+import logging
 import os
+import queue
+import threading
 import time
 
 import httpx
@@ -14,11 +17,12 @@ from projectdavid import (CodeExecutionGeneratedFileEvent,
 from projectdavid.events import ActivityEvent
 from projectdavid_common import UtilsInterface
 
+# Assuming this is part of a Blueprint
 from . import bp_llama
 
-# [FIX]: Import the thread isolation helper
-
+# Setup Logger
 logging_utility = UtilsInterface.LoggingUtility()
+log = logging.getLogger(__name__)
 
 # ------------------------------------------------------------------
 # 1. Initialize Client & Bind for Recursion
@@ -65,15 +69,6 @@ def faux_tool_handler(tool_name, arguments):
                 "message": f"Executed tool '{tool_name}' successfully.",
             }
         )
-
-
-import json
-import logging
-import queue
-import threading
-
-# Use your existing logger if available, otherwise default
-log = logging.getLogger(__name__)
 
 
 def stream_with_thread_isolation(generator_func, *args, **kwargs):
@@ -151,6 +146,7 @@ def process_messages():
         # 2. Extract Parameters
         # ------------------------------------------------------------------
         messages = data.get("messages", [])
+        # Support various casing conventions
         user_id = data.get("userId") or data.get("user_id")
         thread_id = data.get("threadId") or data.get("thread_id")
         assistant_id = data.get("assistantId", "asst_13HyDgBnZxVwh5XexYu74F")
@@ -216,8 +212,6 @@ def process_messages():
 
                     # A. Standard Content
                     if isinstance(event, ContentEvent):
-                        # Optional: Log only the first few chars to avoid flooding
-                        # logging_utility.debug(f"[{run_id}] Content chunk: {event.content[:20]}")
                         yield json.dumps(
                             {
                                 "type": "content",
@@ -270,7 +264,7 @@ def process_messages():
                             }
                         ) + "\n"
 
-                    # F. Generated Files (CRITICAL DEBUGGING)
+                    # F. Generated Files
                     elif isinstance(event, CodeExecutionGeneratedFileEvent):
                         logging_utility.info(
                             f"[{run_id}] 📎 FILE GENERATED EVENT DETECTED:\n"
@@ -287,7 +281,7 @@ def process_messages():
                                 "file_id": event.file_id,
                                 "mime_type": event.mime_type,
                                 "url": event.url,
-                                "base64": event.base64_data,  # Should be None/null now
+                                "base64": event.base64_data,
                                 "run_id": event.run_id,
                             }
                         ) + "\n"
@@ -340,6 +334,26 @@ def process_messages():
                                 {"type": "error", "error": str(exec_err)}
                             ) + "\n"
 
+                    # -------------------------------------------------------------
+                    # H. SCRATCHPAD (New)
+                    # -------------------------------------------------------------
+                    elif isinstance(event, ScratchpadEvent):
+                        logging_utility.info(
+                            f"[{run_id}] 📝 Scratchpad Update: {event.operation}"
+                        )
+                        yield json.dumps(
+                            {
+                                "type": "scratchpad",
+                                "operation": event.operation,
+                                "activity": event.activity,
+                                "state": event.state,
+                                "entry": event.entry,
+                                "content": event.content,
+                                "run_id": event.run_id,
+                            }
+                        ) + "\n"
+
+                    # I. Activity
                     elif isinstance(event, ActivityEvent):
                         logging_utility.info(
                             f"[{run_id}] ℹ️ Activity: {event.activity} ({event.state})"
@@ -354,7 +368,7 @@ def process_messages():
                             }
                         ) + "\n"
 
-                    # H. Status
+                    # J. Status
                     elif isinstance(event, StatusEvent):
                         logging_utility.info(
                             f"[{run_id}] 🔄 Status Update: {event.status}"
@@ -364,6 +378,8 @@ def process_messages():
                                 "type": "status",
                                 "status": event.status,
                                 "run_id": event.run_id,
+                                "tool": getattr(event, "tool", None),
+                                "message": getattr(event, "message", None),
                             }
                         ) + "\n"
 
