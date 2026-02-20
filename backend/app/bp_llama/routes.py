@@ -14,7 +14,7 @@ from projectdavid import (CodeExecutionGeneratedFileEvent,
                           ComputerExecutionOutputEvent, ContentEvent, Entity,
                           HotCodeEvent, ReasoningEvent, StatusEvent,
                           ToolCallRequestEvent)
-from projectdavid.events import ActivityEvent
+from projectdavid.events import ActivityEvent, ScratchpadEvent
 from projectdavid_common import UtilsInterface
 
 # Assuming this is part of a Blueprint
@@ -146,7 +146,6 @@ def process_messages():
         # 2. Extract Parameters
         # ------------------------------------------------------------------
         messages = data.get("messages", [])
-        # Support various casing conventions
         user_id = data.get("userId") or data.get("user_id")
         thread_id = data.get("threadId") or data.get("thread_id")
         assistant_id = data.get("assistantId", "asst_13HyDgBnZxVwh5XexYu74F")
@@ -197,8 +196,6 @@ def process_messages():
                 for event in sync_stream.stream_events(
                     provider=provider, model=selected_model
                 ):
-                    # --- [DEBUG LOGGING] Catch-all for event types ---
-                    # We use DEBUG for high-volume events (content) and INFO for structural events
                     event_type = type(event).__name__
 
                     if event_type not in [
@@ -242,7 +239,6 @@ def process_messages():
 
                     # D. Code Execution Output
                     elif isinstance(event, CodeExecutionOutputEvent):
-                        # Log output to see what the sandbox is saying
                         logging_utility.info(
                             f"[{run_id}] 📟 Sandbox Output: {event.content.strip()[:100]}"
                         )
@@ -273,7 +269,6 @@ def process_messages():
                             f"   - URL Present: {bool(event.url)}\n"
                             f"   - URL: {event.url}"
                         )
-
                         yield json.dumps(
                             {
                                 "type": "code_interpreter_file",
@@ -286,12 +281,11 @@ def process_messages():
                             }
                         ) + "\n"
 
-                    # G. TOOL EXECUTION
+                    # G. Tool Execution
                     elif isinstance(event, ToolCallRequestEvent):
                         logging_utility.info(
                             f"[{run_id}] 🛠️ Tool Request: {event.tool_name} | Args: {event.args}"
                         )
-
                         yield json.dumps(
                             {
                                 "type": "tool_call_start",
@@ -334,29 +328,30 @@ def process_messages():
                                 {"type": "error", "error": str(exec_err)}
                             ) + "\n"
 
-                    # -------------------------------------------------------------
-                    # H. SCRATCHPAD (New)
-                    # -------------------------------------------------------------
+                    # G2. Scratchpad Event — dedicated SDK event type.
+                    # The ScratchpadMixin yields a ScratchpadEvent which carries
+                    # the actual entry content. We forward it directly to the
+                    # frontend as type:'scratchpad' for ScratchpadStatus to render.
                     elif isinstance(event, ScratchpadEvent):
                         logging_utility.info(
-                            f"[{run_id}] 📝 Scratchpad Update: {event.operation}"
+                            f"[{run_id}] 📋 ScratchpadEvent: op={event.operation} | state={event.state} | entry={str(event.entry or event.content or '')[:80]}"
                         )
                         yield json.dumps(
                             {
                                 "type": "scratchpad",
-                                "operation": event.operation,
-                                "activity": event.activity,
                                 "state": event.state,
-                                "entry": event.entry,
-                                "content": event.content,
-                                "run_id": event.run_id,
+                                "operation": event.operation,
+                                "entry": event.entry or event.content or "",
+                                "run_id": getattr(event, "run_id", run_id),
                             }
                         ) + "\n"
 
-                    # I. Activity
+                    # H. Activity — all other tool activity events.
+                    # Forwarded unchanged so WebSearchStatus and DeepResearchStatus
+                    # continue to work as before.
                     elif isinstance(event, ActivityEvent):
                         logging_utility.info(
-                            f"[{run_id}] ℹ️ Activity: {event.activity} ({event.state})"
+                            f"[{run_id}] ℹ️ Activity: {event.activity} | Tool: {event.tool} ({event.state})"
                         )
                         yield json.dumps(
                             {
@@ -368,7 +363,7 @@ def process_messages():
                             }
                         ) + "\n"
 
-                    # J. Status
+                    # I. Status
                     elif isinstance(event, StatusEvent):
                         logging_utility.info(
                             f"[{run_id}] 🔄 Status Update: {event.status}"
