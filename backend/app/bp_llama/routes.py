@@ -177,6 +177,15 @@ def process_messages():
         logging_utility.info(f"Created Run: {run_id}")
 
         # ------------------------------------------------------------------
+        # DEBUG FLAG
+        # Set to True to log every raw event object as it hits the stream loop.
+        # Dumps the full attribute dict of every SDK event — extremely verbose
+        # but invaluable for discovering new event types and debugging the pipeline.
+        # HOW TO TURN OFF: set DEBUG_STREAM = False before deploying to production.
+        # ------------------------------------------------------------------
+        DEBUG_STREAM = False
+
+        # ------------------------------------------------------------------
         # 4. Define the Generator (Unified Single Loop)
         # ------------------------------------------------------------------
         def generate_events_stream():
@@ -206,6 +215,19 @@ def process_messages():
                         logging_utility.info(
                             f"[{run_id}] ⚡ Event Received: {event_type}"
                         )
+
+                    # ── DEBUG: dump full event attrs for every event ──────────
+                    # Shows everything the SDK puts on each event object.
+                    # Disable by setting DEBUG_STREAM = False above.
+                    if DEBUG_STREAM:
+                        try:
+                            logging_utility.info(
+                                f"[{run_id}] 🔬 RAW EVENT: type={event_type} | attrs={vars(event)}"
+                            )
+                        except Exception:
+                            logging_utility.info(
+                                f"[{run_id}] 🔬 RAW EVENT: type={event_type} | (no vars)"
+                            )
 
                     # A. Standard Content
                     if isinstance(event, ContentEvent):
@@ -303,12 +325,17 @@ def process_messages():
                                 logging_utility.info(
                                     f"[{run_id}] ✅ Tool executed successfully in {duration:.2f}s."
                                 )
+
                                 yield json.dumps(
                                     {
-                                        "type": "status",
-                                        "status": "tool_execution_complete",
+                                        "type": "web",
+                                        "status": "success",
+                                        "run_id": run_id,
+                                        "tool": event.tool_name,
+                                        "message": f"Tool '{event.tool_name}' executed successfully in {duration:.2f}s.",
                                     }
                                 ) + "\n"
+
                             else:
                                 logging_utility.error(
                                     f"[{run_id}] ❌ Tool execution returned False."
@@ -363,18 +390,15 @@ def process_messages():
                             }
                         ) + "\n"
 
-                    # I. Status
-                    elif isinstance(event, StatusEvent):
-                        logging_utility.info(
-                            f"[{run_id}] 🔄 Status Update: {event.status}"
-                        )
+                    # I. web
+                    elif isinstance(event, WebEvent):
                         yield json.dumps(
                             {
-                                "type": "status",
+                                "type": "web",
                                 "status": event.status,
                                 "run_id": event.run_id,
-                                "tool": getattr(event, "tool", None),
-                                "message": getattr(event, "message", None),
+                                "tool": event.tool,
+                                "message": event.message,
                             }
                         ) + "\n"
 
