@@ -186,6 +186,16 @@ def process_messages():
         # ------------------------------------------------------------------
         DEBUG_STREAM = False
 
+        # Registry to determine how successful tools are routed to the frontend
+        WEB_TOOL_NAMES = {
+            "perform_web_search",
+            "read_web_page",
+            "scroll_web_page",
+            "search_web_page",
+            "web_search",
+            "browse",
+        }
+
         # ------------------------------------------------------------------
         # 4. Define the Generator (Unified Single Loop)
         # ------------------------------------------------------------------
@@ -338,13 +348,22 @@ def process_messages():
                                     f"[{run_id}] ✅ Tool executed successfully in {duration:.2f}s."
                                 )
 
+                                # --- THE FIX: Route the success message appropriately ---
+                                is_web_tool = event.tool_name in WEB_TOOL_NAMES
+
                                 yield json.dumps(
                                     {
-                                        "type": "web_status",
+                                        "type": (
+                                            "web_status"
+                                            if is_web_tool
+                                            else "research_status"
+                                        ),
                                         "status": "success",
+                                        "state": "success",  # for research_status compatibility
                                         "run_id": run_id,
                                         "tool": event.tool_name,
                                         "message": f"Tool '{event.tool_name}' executed successfully in {duration:.2f}s.",
+                                        "activity": f"Tool '{event.tool_name}' executed successfully in {duration:.2f}s.",
                                     }
                                 ) + "\n"
 
@@ -355,7 +374,7 @@ def process_messages():
                                 yield json.dumps(
                                     {
                                         "type": "error",
-                                        "error": "Tool execution failed internally",
+                                        "error": f"Tool '{event.tool_name}' execution failed internally",
                                     }
                                 ) + "\n"
                         except Exception as exec_err:
@@ -379,8 +398,8 @@ def process_messages():
                                 "type": "scratchpad_status",
                                 "state": event.state,
                                 "operation": event.operation,
-                                "activity": event.activity,  # <--- Added
-                                "tool": event.tool,  # <--- Added
+                                "activity": event.activity,
+                                "tool": event.tool,
                                 "entry": event.entry or event.content or "",
                                 "run_id": getattr(event, "run_id", run_id),
                             }
