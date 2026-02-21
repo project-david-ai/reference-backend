@@ -12,9 +12,10 @@ from flask_jwt_extended import jwt_required
 from projectdavid import (CodeExecutionGeneratedFileEvent,
                           CodeExecutionOutputEvent,
                           ComputerExecutionOutputEvent, ContentEvent, Entity,
-                          HotCodeEvent, ReasoningEvent, StatusEvent,
-                          ToolCallRequestEvent)
-from projectdavid.events import ActivityEvent, ScratchpadEvent
+                          HotCodeEvent, ReasoningEvent, ToolCallRequestEvent,
+                          WebStatusEvent)
+from projectdavid.events import (CodeStatusEvent, ResearchStatusEvent,
+                                 ScratchpadEvent)
 from projectdavid_common import UtilsInterface
 
 # Assuming this is part of a Blueprint
@@ -249,6 +250,17 @@ def process_messages():
                             }
                         ) + "\n"
 
+                    elif isinstance(event, CodeStatusEvent):
+                        yield json.dumps(
+                            {
+                                "type": "code_status",
+                                "activity": event.activity,
+                                "state": event.state,
+                                "tool": event.tool,
+                                "run_id": event.run_id,
+                            }
+                        ) + "\n"
+
                     # C. Hot Code
                     elif isinstance(event, HotCodeEvent):
                         yield json.dumps(
@@ -328,7 +340,7 @@ def process_messages():
 
                                 yield json.dumps(
                                     {
-                                        "type": "web",
+                                        "type": "web_status",
                                         "status": "success",
                                         "run_id": run_id,
                                         "tool": event.tool_name,
@@ -356,18 +368,19 @@ def process_messages():
                             ) + "\n"
 
                     # G2. Scratchpad Event — dedicated SDK event type.
-                    # The ScratchpadMixin yields a ScratchpadEvent which carries
-                    # the actual entry content. We forward it directly to the
-                    # frontend as type:'scratchpad' for ScratchpadStatus to render.
+                    # Forwarded to the frontend as type:'scratchpad_status'
+                    # so the ScratchpadStatus component can render operations and updates.
                     elif isinstance(event, ScratchpadEvent):
                         logging_utility.info(
-                            f"[{run_id}] 📋 ScratchpadEvent: op={event.operation} | state={event.state} | entry={str(event.entry or event.content or '')[:80]}"
+                            f"[{run_id}] 📋 ScratchpadEvent: op={event.operation} | state={event.state} | activity={event.activity}"
                         )
                         yield json.dumps(
                             {
-                                "type": "scratchpad",
+                                "type": "scratchpad_status",
                                 "state": event.state,
                                 "operation": event.operation,
+                                "activity": event.activity,  # <--- Added
+                                "tool": event.tool,  # <--- Added
                                 "entry": event.entry or event.content or "",
                                 "run_id": getattr(event, "run_id", run_id),
                             }
@@ -376,13 +389,13 @@ def process_messages():
                     # H. Activity — all other tool activity events.
                     # Forwarded unchanged so WebSearchStatus and DeepResearchStatus
                     # continue to work as before.
-                    elif isinstance(event, ActivityEvent):
+                    elif isinstance(event, ResearchStatusEvent):
                         logging_utility.info(
                             f"[{run_id}] ℹ️ Activity: {event.activity} | Tool: {event.tool} ({event.state})"
                         )
                         yield json.dumps(
                             {
-                                "type": "activity",
+                                "type": "research_status",
                                 "activity": event.activity,
                                 "tool": event.tool,
                                 "state": event.state,
@@ -391,10 +404,10 @@ def process_messages():
                         ) + "\n"
 
                     # I. web
-                    elif isinstance(event, WebEvent):
+                    elif isinstance(event, WebStatusEvent):
                         yield json.dumps(
                             {
-                                "type": "web",
+                                "type": "web_status",
                                 "status": event.status,
                                 "run_id": event.run_id,
                                 "tool": event.tool,
