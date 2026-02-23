@@ -152,7 +152,6 @@ def process_messages():
         assistant_id = data.get("assistantId", "asst_13HyDgBnZxVwh5XexYu74F")
 
         selected_model = data.get("model") or "hyperbolic/deepseek-ai/DeepSeek-V3-0324"
-        provider = data.get("provider") or "Hyperbolic"
         hyperbolic_api_key = data.get("apiKey") or os.getenv("HYPERBOLIC_API_KEY")
 
         if not thread_id or not assistant_id or not messages:
@@ -184,9 +183,23 @@ def process_messages():
         # but invaluable for discovering new event types and debugging the pipeline.
         # HOW TO TURN OFF: set DEBUG_STREAM = False before deploying to production.
         # ------------------------------------------------------------------
-        DEBUG_STREAM = False
+        DEBUG_STREAM = True
 
-        # Registry to determine how successful tools are routed to the frontend
+        # ------------------------------------------------------------------
+        # EVENT ROUTING REGISTRIES
+        #
+        # WEB_TOOL_NAMES   → tool_call_start / success events emit type:'web_status'
+        #                    Fields: { status, message }
+        #
+        # DELEGATION_TOOLS → delegation_mixin emits its own terminal research_status
+        #                    event, so we must NOT emit a second one here on success.
+        #
+        # Everything else  → emits type:'research_status'
+        #                    Fields: { state, activity }
+        #
+        # NEVER mix fields across types. web_status uses status+message.
+        # research_status uses state+activity. This is the contract.
+        # ------------------------------------------------------------------
         WEB_TOOL_NAMES = {
             "perform_web_search",
             "read_web_page",
@@ -194,6 +207,10 @@ def process_messages():
             "search_web_page",
             "web_search",
             "browse",
+        }
+
+        DELEGATION_TOOLS = {
+            "delegate_research_task",
         }
 
         # ------------------------------------------------------------------
@@ -214,7 +231,7 @@ def process_messages():
 
             try:
                 for event in sync_stream.stream_events(
-                    provider=provider, model=selected_model
+                    model=selected_model
                 ):
                     event_type = type(event).__name__
 
@@ -260,6 +277,7 @@ def process_messages():
                             }
                         ) + "\n"
 
+                    # B2. Code Status
                     elif isinstance(event, CodeStatusEvent):
                         yield json.dumps(
                             {
@@ -348,24 +366,35 @@ def process_messages():
                                     f"[{run_id}] ✅ Tool executed successfully in {duration:.2f}s."
                                 )
 
-                                # --- THE FIX: Route the success message appropriately ---
                                 is_web_tool = event.tool_name in WEB_TOOL_NAMES
+                                is_delegation_tool = event.tool_name in DELEGATION_TOOLS
 
-                                yield json.dumps(
-                                    {
-                                        "type": (
-                                            "web_status"
-                                            if is_web_tool
-                                            else "research_status"
-                                        ),
-                                        "status": "success",
-                                        "state": "success",  # for research_status compatibility
-                                        "run_id": run_id,
-                                        "tool": event.tool_name,
-                                        "message": f"Tool '{event.tool_name}' executed successfully in {duration:.2f}s.",
-                                        "activity": f"Tool '{event.tool_name}' executed successfully in {duration:.2f}s.",
-                                    }
-                                ) + "\n"
+                                if is_web_tool:
+                                    # web_status contract: status + message only.
+                                    yield json.dumps(
+                                        {
+                                            "type": "web_status",
+                                            "run_id": run_id,
+                                            "tool": event.tool_name,
+                                            "status": "success",
+                                            "message": f"'{event.tool_name}' completed in {duration:.2f}s.",
+                                        }
+                                    ) + "\n"
+
+                                elif not is_delegation_tool:
+                                    # research_status contract: state + activity only.
+                                    # Delegation tools emit their own terminal research_status
+                                    # event from within delegation_mixin — emitting here would
+                                    # double-fire and corrupt the activity feed.
+                                    yield json.dumps(
+                                        {
+                                            "type": "research_status",
+                                            "run_id": run_id,
+                                            "tool": event.tool_name,
+                                            "state": "completed",
+                                            "activity": f"'{event.tool_name}' completed in {duration:.2f}s.",
+                                        }
+                                    ) + "\n"
 
                             else:
                                 logging_utility.error(
@@ -377,6 +406,7 @@ def process_messages():
                                         "error": f"Tool '{event.tool_name}' execution failed internally",
                                     }
                                 ) + "\n"
+
                         except Exception as exec_err:
                             logging_utility.error(
                                 f"[{run_id}] 💥 Exception during tool execute: {exec_err}",
@@ -402,15 +432,16 @@ def process_messages():
                                 "tool": event.tool,
                                 "entry": event.entry or event.content or "",
                                 "run_id": getattr(event, "run_id", run_id),
+                                "assistant_id": event.assistant_id,
                             }
                         ) + "\n"
 
-                    # H. Activity — all other tool activity events.
-                    # Forwarded unchanged so WebSearchStatus and DeepResearchStatus
-                    # continue to work as before.
+                    # H. Research Status — delegation and orchestration activity.
+                    # Contract: { type, activity, tool, state, run_id }
+                    # Never contains status or message — those belong to web_status.
                     elif isinstance(event, ResearchStatusEvent):
                         logging_utility.info(
-                            f"[{run_id}] ℹ️ Activity: {event.activity} | Tool: {event.tool} ({event.state})"
+                            f"[{run_id}] ℹ️ ResearchStatus: {event.activity} | Tool: {event.tool} ({event.state})"
                         )
                         yield json.dumps(
                             {
@@ -422,7 +453,9 @@ def process_messages():
                             }
                         ) + "\n"
 
-                    # I. web
+                    # I. Web Status — web tool progress from web_search_mixin.
+                    # Contract: { type, status, message, tool, run_id }
+                    # Never contains state or activity — those belong to research_status.
                     elif isinstance(event, WebStatusEvent):
                         yield json.dumps(
                             {
