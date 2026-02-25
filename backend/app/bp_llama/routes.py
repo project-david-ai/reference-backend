@@ -431,8 +431,8 @@ def process_messages():
                             yield json.dumps(
                                 {
                                     "type": "engineer_status",
-                                    "status": "in_progress",
-                                    "message": f"Establishing SSH/Telnet session to {target_host} and executing commands...",
+                                    "state": "in_progress",
+                                    "activity": f"Establishing SSH/Telnet session to {target_host} and executing commands...",
                                     "tool": event.tool_name,
                                     "run_id": run_id,
                                 }
@@ -455,8 +455,8 @@ def process_messages():
                                     yield json.dumps(
                                         {
                                             "type": "engineer_status",
-                                            "status": "completed",
-                                            "message": f"Network commands executed successfully in {duration:.2f}s.",
+                                            "state": "completed",
+                                            "activity": f"Network commands executed successfully in {duration:.2f}s.",
                                             "tool": event.tool_name,
                                             "run_id": run_id,
                                         }
@@ -552,13 +552,13 @@ def process_messages():
                     # J. Engineer Status Event
                     elif isinstance(event, EngineerStatusEvent):
                         logging_utility.info(
-                            f"[{run_id}] ⚙️ EngineerStatus: {event.message} | Tool: {event.tool} ({event.status})"
+                            f"[{run_id}] ⚙️ EngineerStatus: {event.activity} | Tool: {event.tool} ({event.state})"
                         )
                         yield json.dumps(
                             {
                                 "type": "engineer_status",
-                                "status": event.status,
-                                "message": event.message,
+                                "state": event.state,
+                                "activity": event.activity,
                                 "tool": event.tool,
                                 "run_id": getattr(event, "run_id", run_id),
                             }
@@ -587,8 +587,8 @@ def process_messages():
                             yield json.dumps(
                                 {
                                     "type": "engineer_status",
-                                    "status": "in_progress",
-                                    "message": f"[Junior] Establishing SSH/Telnet session to {target_host}...",
+                                    "state": "in_progress",
+                                    "activity": f"[Junior] Establishing SSH/Telnet session to {target_host}...",
                                     "tool": event.tool_name,
                                     "run_id": run_id,
                                 }
@@ -615,8 +615,8 @@ def process_messages():
                                     yield json.dumps(
                                         {
                                             "type": "engineer_status",
-                                            "status": "completed",
-                                            "message": f"[Junior] Network commands executed successfully in {duration:.2f}s.",
+                                            "state": "completed",
+                                            "activity": f"[Junior] Network commands executed successfully in {duration:.2f}s.",
                                             "tool": event.tool_name,
                                             "run_id": run_id,
                                         }
