@@ -8,7 +8,6 @@ import time
 import httpx
 from flask import Response, jsonify, request, stream_with_context
 from flask_jwt_extended import jwt_required
-
 # --- Event Classes ---
 from projectdavid import (CodeExecutionGeneratedFileEvent,
                           CodeExecutionOutputEvent,
@@ -16,8 +15,8 @@ from projectdavid import (CodeExecutionGeneratedFileEvent,
                           HotCodeEvent, ReasoningEvent, ToolCallRequestEvent,
                           WebStatusEvent)
 from projectdavid.events import (CodeStatusEvent, EngineerStatusEvent,
-                                 ResearchStatusEvent, ScratchpadEvent, ToolInterceptEvent)
-
+                                 ResearchStatusEvent, ScratchpadEvent,
+                                 ToolInterceptEvent)
 # --- Utilities ---
 from projectdavid.utils.network_device_handler import NetworkDeviceHandler
 from projectdavid_common import UtilsInterface
@@ -77,18 +76,20 @@ def get_secure_device_credentials(hostname: str) -> dict:
             f"🧪 [Auth] GNS3 lab match: {hostname} → {lab_entry['host']}:{lab_entry['port']} (telnet)"
         )
         return {
-            "device_type": "cisco_ios_telnet",  # 🔑 Critical: Tells Netmiko to use Telnet!
+            "device_type": "cisco_ios_telnet",
             "host": lab_entry["host"],
             "port": lab_entry["port"],
             "username": os.environ.get("NET_ADMIN_USER", "cisco"),
             "password": os.environ.get("NET_ADMIN_PASS", "cisco"),
-            "secret": os.environ.get("NET_ADMIN_PASS", "cisco"),  # Useful for enable mode
-            "global_delay_factor": 2,  # GNS3 can be slow, giving it extra time
+            "secret": os.environ.get("NET_ADMIN_PASS", "cisco"),
+            "global_delay_factor": 2,
+            "read_timeout_override": 30,
+            "session_log": "netmiko_gns3_debug.log",
         }
 
     # --- Production fallback: real IP via SSH ---
     logging_utility.warning(
-        f"⚠️[Auth] '{hostname}' not in GNS3 inventory. Falling back to SSH with env creds."
+        f"⚠️ [Auth] '{hostname}' not in GNS3 inventory. Falling back to SSH with env creds."
     )
     net_user = os.environ.get("NET_ADMIN_USER", "admin")
     net_pass = os.environ.get("NET_ADMIN_PASS", "cisco")
@@ -106,6 +107,7 @@ def get_secure_device_credentials(hostname: str) -> dict:
         "password": net_pass,
         "secret": net_pass,
         "global_delay_factor": 2,
+        "read_timeout_override": 30,
     }
 
 
@@ -234,7 +236,7 @@ def process_messages():
         # ------------------------------------------------------------------
         # Extract Parameters
         # ------------------------------------------------------------------
-        messages = data.get("messages",[])
+        messages = data.get("messages", [])
         user_id = data.get("userId") or data.get("user_id")
         thread_id = data.get("threadId") or data.get("thread_id")
         assistant_id = data.get("assistantId", "asst_13HyDgBnZxVwh5XexYu74F")
@@ -305,7 +307,7 @@ def process_messages():
                 for event in sync_stream.stream_events(model=selected_model):
                     event_type = type(event).__name__
 
-                    if event_type not in[
+                    if event_type not in [
                         "ContentEvent",
                         "HotCodeEvent",
                         "ReasoningEvent",
