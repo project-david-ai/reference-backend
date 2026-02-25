@@ -8,16 +8,17 @@ import time
 import httpx
 from flask import Response, jsonify, request, stream_with_context
 from flask_jwt_extended import jwt_required
+
 # --- Event Classes ---
 from projectdavid import (CodeExecutionGeneratedFileEvent,
                           CodeExecutionOutputEvent,
                           ComputerExecutionOutputEvent, ContentEvent, Entity,
                           HotCodeEvent, ReasoningEvent, ToolCallRequestEvent,
                           WebStatusEvent)
-# ✅ ADDED EngineerStatusEvent to the import list
 from projectdavid.events import (CodeStatusEvent, EngineerStatusEvent,
-                                 ResearchStatusEvent, ScratchpadEvent)
-# ✅ ADDED NetworkDeviceHandler for local, secure Netmiko execution
+                                 ResearchStatusEvent, ScratchpadEvent, ToolInterceptEvent)
+
+# --- Utilities ---
 from projectdavid.utils.network_device_handler import NetworkDeviceHandler
 from projectdavid_common import UtilsInterface
 
@@ -50,20 +51,48 @@ except Exception as e:
 # 1.5. Local Tool Execution Environment (Network Handlers & Dispatcher)
 # ------------------------------------------------------------------
 
+# ------------------------------------------------------------------
+# GNS3 Lab Inventory — hostname → localhost telnet console mapping
+# Update ports to match your topology as it changes.
+# ------------------------------------------------------------------
+GNS3_INVENTORY = {
+    "R1": {"host": "127.0.0.1", "port": 10000},
+    "R2": {"host": "127.0.0.1", "port": 10001},
+    "R3": {"host": "127.0.0.1", "port": 10002},
+}
+
 
 def get_secure_device_credentials(hostname: str) -> dict:
     """
-    Consumer's local secure credential resolver.
-    In production, this would query HashiCorp Vault, AWS Secrets Manager,
-    a local encrypted DB, or RADIUS/TACACS+ integrated environment variables.
+    Resolves connection parameters for a given hostname.
+    For GNS3 lab devices, maps logical names to localhost telnet console ports.
+    In production, this would query HashiCorp Vault, AWS Secrets Manager, etc.
     """
-    logging_utility.info(f"🔒 [Auth] Resolving local credentials for {hostname}...")
+    logging_utility.info(f"🔒 [Auth] Resolving credentials for '{hostname}'...")
 
-    # Example: Simple fallback to standard env vars for the demo
+    # --- GNS3 Lab: resolve hostname to localhost console port ---
+    lab_entry = GNS3_INVENTORY.get(hostname.upper())
+    if lab_entry:
+        logging_utility.info(
+            f"🧪 [Auth] GNS3 lab match: {hostname} → {lab_entry['host']}:{lab_entry['port']} (telnet)"
+        )
+        return {
+            "device_type": "cisco_ios_telnet",  # 🔑 Critical: Tells Netmiko to use Telnet!
+            "host": lab_entry["host"],
+            "port": lab_entry["port"],
+            "username": os.environ.get("NET_ADMIN_USER", "cisco"),
+            "password": os.environ.get("NET_ADMIN_PASS", "cisco"),
+            "secret": os.environ.get("NET_ADMIN_PASS", "cisco"),  # Useful for enable mode
+            "global_delay_factor": 2,  # GNS3 can be slow, giving it extra time
+        }
+
+    # --- Production fallback: real IP via SSH ---
+    logging_utility.warning(
+        f"⚠️[Auth] '{hostname}' not in GNS3 inventory. Falling back to SSH with env creds."
+    )
     net_user = os.environ.get("NET_ADMIN_USER", "admin")
     net_pass = os.environ.get("NET_ADMIN_PASS", "cisco")
 
-    # We can infer device_type based on naming conventions or an inventory DB
     device_type = "cisco_ios"
     if "nexus" in hostname.lower():
         device_type = "cisco_nxos"
@@ -75,16 +104,20 @@ def get_secure_device_credentials(hostname: str) -> dict:
         "host": hostname,
         "username": net_user,
         "password": net_pass,
-        "global_delay_factor": 2,  # Recommended for slower network devices
+        "secret": net_pass,
+        "global_delay_factor": 2,
     }
 
 
-# Initialize the Curated Network Handler
+# Initialize the Curated Network Handler AFTER defining the resolution logic
 network_execution_handler = NetworkDeviceHandler(
     credential_provider_callback=get_secure_device_credentials
 )
 
 
+# ------------------------------------------------------------------
+# 1.6 Tool Dispatcher
+# ------------------------------------------------------------------
 def master_tool_dispatcher(tool_name: str, arguments: dict) -> str:
     """
     Routes incoming tool calls from the Junior Engineer (or other models)
@@ -97,13 +130,11 @@ def master_tool_dispatcher(tool_name: str, arguments: dict) -> str:
     try:
         # --- NETWORK ENGINEERING TOOLS ---
         if tool_name == "execute_network_command":
-            # NOTE: We pass "run_network_commands" to satisfy the internal
-            # hardcoded check inside the NetworkDeviceHandler class.
             return network_execution_handler("run_network_commands", arguments)
 
-        # --- OTHER TOOLS (e.g., your mock flight times) ---
+        # --- OTHER TOOLS ---
         elif tool_name == "get_flight_times":
-            time.sleep(1)  # Simulate work
+            time.sleep(1)
             departure = arguments.get("departure", "Unknown")
             arrival = arguments.get("arrival", "Unknown")
             return json.dumps(
@@ -132,6 +163,9 @@ def master_tool_dispatcher(tool_name: str, arguments: dict) -> str:
         )
 
 
+# ------------------------------------------------------------------
+# 1.7 Stream Isolation Helper
+# ------------------------------------------------------------------
 def stream_with_thread_isolation(generator_func, *args, **kwargs):
     """
     Executes a generator function in a separate thread and yields the results
@@ -148,32 +182,23 @@ def stream_with_thread_isolation(generator_func, *args, **kwargs):
 
     def worker():
         try:
-            # Run the generator in this isolated thread
-            # The SDK will successfully create/use its own loop here.
             for chunk in generator_func(*args, **kwargs):
                 q.put(chunk)
             q.put(None)  # Sentinel: Stream finished successfully
         except Exception as e:
-            # Pass exceptions back to main thread
             q.put(e)
 
-    # Daemon=True ensures thread dies if main process dies
     t = threading.Thread(target=worker, daemon=True)
     t.start()
 
-    # Consume queue in the main Flask thread
     while True:
         try:
-            # Wait for data (blocks the request thread, not the server if threaded)
-            # Timeout ensures we don't hang forever if the worker dies silently
             item = q.get(timeout=300)
 
             if item is None:
-                break  # Clean exit
+                break
 
             if isinstance(item, Exception):
-                # We can't change the HTTP status code once streaming starts,
-                # so we log the error and break the stream with a JSON error block.
                 error_msg = str(item)
                 log.error(f"Stream worker thread failed: {error_msg}")
                 yield json.dumps({"type": "error", "error": error_msg}) + "\n"
@@ -186,6 +211,9 @@ def stream_with_thread_isolation(generator_func, *args, **kwargs):
             break
 
 
+# ------------------------------------------------------------------
+# 2. Main Generation Route
+# ------------------------------------------------------------------
 @bp_llama.route("/api/messages/process", methods=["POST"])
 @jwt_required()
 def process_messages():
@@ -204,9 +232,9 @@ def process_messages():
 
     try:
         # ------------------------------------------------------------------
-        # 2. Extract Parameters
+        # Extract Parameters
         # ------------------------------------------------------------------
-        messages = data.get("messages", [])
+        messages = data.get("messages",[])
         user_id = data.get("userId") or data.get("user_id")
         thread_id = data.get("threadId") or data.get("thread_id")
         assistant_id = data.get("assistantId", "asst_13HyDgBnZxVwh5XexYu74F")
@@ -222,7 +250,7 @@ def process_messages():
         user_message_content = messages[-1].get("content", "").strip()
 
         # ------------------------------------------------------------------
-        # 3. Create Message & Run
+        # Create Message & Run
         # ------------------------------------------------------------------
         logging_utility.info(f"Creating message for thread {thread_id}...")
         message = client.messages.create_message(
@@ -258,7 +286,7 @@ def process_messages():
         }
 
         # ------------------------------------------------------------------
-        # 4. Define the Generator (Unified Single Loop)
+        # Define the Generator (Unified Single Loop)
         # ------------------------------------------------------------------
         def generate_events_stream():
             sync_stream = client.synchronous_inference_stream
@@ -277,7 +305,7 @@ def process_messages():
                 for event in sync_stream.stream_events(model=selected_model):
                     event_type = type(event).__name__
 
-                    if event_type not in [
+                    if event_type not in[
                         "ContentEvent",
                         "HotCodeEvent",
                         "ReasoningEvent",
@@ -382,13 +410,12 @@ def process_messages():
                             }
                         ) + "\n"
 
-                    # G. Tool Execution
+                    # G. Tool Execution (Senior / Main Thread)
                     elif isinstance(event, ToolCallRequestEvent):
                         logging_utility.info(
                             f"[{run_id}] 🛠️ Tool Request: {event.tool_name} | Args: {event.args}"
                         )
 
-                        # Yield standard tool call start
                         yield json.dumps(
                             {
                                 "type": "tool_call_start",
@@ -397,16 +424,13 @@ def process_messages():
                             }
                         ) + "\n"
 
-                        # --- NEW: Pre-execution notification for Network Tools ---
-                        # Because Netmiko SSH execution blocks, we emit an engineer status
-                        # to the frontend so it knows an SSH connection is being established.
                         if event.tool_name == "execute_network_command":
                             target_host = event.args.get("hostname", "unknown device")
                             yield json.dumps(
                                 {
                                     "type": "engineer_status",
                                     "status": "in_progress",
-                                    "message": f"Establishing SSH session to {target_host} and executing commands...",
+                                    "message": f"Establishing SSH/Telnet session to {target_host} and executing commands...",
                                     "tool": event.tool_name,
                                     "run_id": run_id,
                                 }
@@ -414,10 +438,7 @@ def process_messages():
 
                         try:
                             start_time = time.time()
-
-                            # --- NEW: Dispatch execution to our secure master dispatcher ---
                             success = event.execute(master_tool_dispatcher)
-
                             duration = time.time() - start_time
 
                             if success:
@@ -428,7 +449,6 @@ def process_messages():
                                 is_web_tool = event.tool_name in WEB_TOOL_NAMES
                                 is_delegation_tool = event.tool_name in DELEGATION_TOOLS
 
-                                # --- NEW: Post-execution notification for Network Tools ---
                                 if event.tool_name == "execute_network_command":
                                     yield json.dumps(
                                         {
@@ -528,7 +548,6 @@ def process_messages():
                         ) + "\n"
 
                     # J. Engineer Status Event
-                    # Listens to network engineering tool updates (from SDK internals if any)
                     elif isinstance(event, EngineerStatusEvent):
                         logging_utility.info(
                             f"[{run_id}] ⚙️ EngineerStatus: {event.message} | Tool: {event.tool} ({event.status})"
@@ -542,6 +561,94 @@ def process_messages():
                                 "run_id": getattr(event, "run_id", run_id),
                             }
                         ) + "\n"
+
+                    # K. Tool Intercept Event
+                    # Emitted when the delegation handler intercepts a Junior's tool call.
+                    # Mirrors section G but uses execute_intercepted, scoped to the worker's thread.
+                    elif isinstance(event, ToolInterceptEvent):
+                        logging_utility.info(
+                            f"[{run_id}] 🔧 ToolIntercept: tool={event.tool_name} | origin={event.origin} | thread={event.thread_id} | args={event.args}"
+                        )
+
+                        yield json.dumps(
+                            {
+                                "type": "tool_call_start",
+                                "tool": event.tool_name,
+                                "args": event.args,
+                                "origin": event.origin,
+                                "run_id": run_id,
+                            }
+                        ) + "\n"
+
+                        if event.tool_name == "execute_network_command":
+                            target_host = event.args.get("hostname", "unknown device")
+                            yield json.dumps(
+                                {
+                                    "type": "engineer_status",
+                                    "status": "in_progress",
+                                    "message": f"[Junior] Establishing SSH/Telnet session to {target_host}...",
+                                    "tool": event.tool_name,
+                                    "run_id": run_id,
+                                }
+                            ) + "\n"
+
+                        try:
+                            start_time = time.time()
+
+                            success = event.execute_intercepted(
+                                tool_executor=master_tool_dispatcher,
+                                runs_client=client.runs,
+                                actions_client=client.actions,
+                                messages_client=client.messages,
+                            )
+
+                            duration = time.time() - start_time
+
+                            if success:
+                                logging_utility.info(
+                                    f"[{run_id}] ✅ Intercepted tool '{event.tool_name}' executed in {duration:.2f}s."
+                                )
+
+                                if event.tool_name == "execute_network_command":
+                                    yield json.dumps(
+                                        {
+                                            "type": "engineer_status",
+                                            "status": "completed",
+                                            "message": f"[Junior] Network commands executed successfully in {duration:.2f}s.",
+                                            "tool": event.tool_name,
+                                            "run_id": run_id,
+                                        }
+                                    ) + "\n"
+                                else:
+                                    yield json.dumps(
+                                        {
+                                            "type": "research_status",
+                                            "run_id": run_id,
+                                            "tool": event.tool_name,
+                                            "state": "completed",
+                                            "activity": f"[Junior] '{event.tool_name}' completed in {duration:.2f}s.",
+                                        }
+                                    ) + "\n"
+
+                            else:
+                                logging_utility.error(
+                                    f"[{run_id}] ❌ Intercepted tool '{event.tool_name}' returned False."
+                                )
+                                yield json.dumps(
+                                    {
+                                        "type": "error",
+                                        "error": f"[Junior] Tool '{event.tool_name}' execution failed internally",
+                                    }
+                                ) + "\n"
+
+                        except Exception as exec_err:
+                            logging_utility.error(
+                                f"[{run_id}] 💥 Exception during intercepted tool execute: {exec_err}",
+                                exc_info=True,
+                            )
+                            yield json.dumps(
+                                {"type": "error", "error": str(exec_err)}
+                            ) + "\n"
 
                 # End of Stream
                 logging_utility.info(f"[{run_id}] 🏁 Stream complete.")
