@@ -14,8 +14,11 @@ from projectdavid import (CodeExecutionGeneratedFileEvent,
                           ComputerExecutionOutputEvent, ContentEvent, Entity,
                           HotCodeEvent, ReasoningEvent, ToolCallRequestEvent,
                           WebStatusEvent)
-from projectdavid.events import (CodeStatusEvent, ResearchStatusEvent,
-                                 ScratchpadEvent)
+# ✅ ADDED EngineerStatusEvent to the import list
+from projectdavid.events import (CodeStatusEvent, EngineerStatusEvent,
+                                 ResearchStatusEvent, ScratchpadEvent)
+# ✅ ADDED NetworkDeviceHandler for local, secure Netmiko execution
+from projectdavid.utils.network_device_handler import NetworkDeviceHandler
 from projectdavid_common import UtilsInterface
 
 # Assuming this is part of a Blueprint
@@ -43,32 +46,89 @@ except Exception as e:
     client = None
 
 
-def faux_tool_handler(tool_name, arguments):
-    """Consumer's actual tool execution logic."""
+# ------------------------------------------------------------------
+# 1.5. Local Tool Execution Environment (Network Handlers & Dispatcher)
+# ------------------------------------------------------------------
+
+
+def get_secure_device_credentials(hostname: str) -> dict:
+    """
+    Consumer's local secure credential resolver.
+    In production, this would query HashiCorp Vault, AWS Secrets Manager,
+    a local encrypted DB, or RADIUS/TACACS+ integrated environment variables.
+    """
+    logging_utility.info(f"🔒 [Auth] Resolving local credentials for {hostname}...")
+
+    # Example: Simple fallback to standard env vars for the demo
+    net_user = os.environ.get("NET_ADMIN_USER", "admin")
+    net_pass = os.environ.get("NET_ADMIN_PASS", "cisco")
+
+    # We can infer device_type based on naming conventions or an inventory DB
+    device_type = "cisco_ios"
+    if "nexus" in hostname.lower():
+        device_type = "cisco_nxos"
+    elif "arista" in hostname.lower():
+        device_type = "arista_eos"
+
+    return {
+        "device_type": device_type,
+        "host": hostname,
+        "username": net_user,
+        "password": net_pass,
+        "global_delay_factor": 2,  # Recommended for slower network devices
+    }
+
+
+# Initialize the Curated Network Handler
+network_execution_handler = NetworkDeviceHandler(
+    credential_provider_callback=get_secure_device_credentials
+)
+
+
+def master_tool_dispatcher(tool_name: str, arguments: dict) -> str:
+    """
+    Routes incoming tool calls from the Junior Engineer (or other models)
+    to the appropriate local Python execution logic.
+    """
     logging_utility.info(
-        f"[ConsumerApp] Handling tool: {tool_name} | Args: {arguments}"
+        f"🛠️ [Dispatcher] Routing tool: {tool_name} | Args: {arguments}"
     )
 
-    # Simulate work
-    time.sleep(1)
+    try:
+        # --- NETWORK ENGINEERING TOOLS ---
+        if tool_name == "execute_network_command":
+            # NOTE: We pass "run_network_commands" to satisfy the internal
+            # hardcoded check inside the NetworkDeviceHandler class.
+            return network_execution_handler("run_network_commands", arguments)
 
-    if tool_name == "get_flight_times":
-        departure = arguments.get("departure", "Unknown")
-        arrival = arguments.get("arrival", "Unknown")
-        return json.dumps(
-            {
-                "status": "success",
-                "info": f"Flight from {departure} to {arrival}",
-                "duration": "4h 30m",
-                "price": "$450",
-            }
+        # --- OTHER TOOLS (e.g., your mock flight times) ---
+        elif tool_name == "get_flight_times":
+            time.sleep(1)  # Simulate work
+            departure = arguments.get("departure", "Unknown")
+            arrival = arguments.get("arrival", "Unknown")
+            return json.dumps(
+                {
+                    "status": "success",
+                    "info": f"Flight from {departure} to {arrival}",
+                    "duration": "4h 30m",
+                    "price": "$450",
+                }
+            )
+
+        # --- UNKNOWN TOOLS ---
+        else:
+            err_msg = (
+                f"Tool '{tool_name}' is not registered in the consumer dispatcher."
+            )
+            logging_utility.error(err_msg)
+            return json.dumps({"status": "error", "error": err_msg})
+
+    except Exception as e:
+        logging_utility.error(
+            f"💥 [Dispatcher] Unhandled error executing {tool_name}: {e}"
         )
-    else:
         return json.dumps(
-            {
-                "status": "success",
-                "message": f"Executed tool '{tool_name}' successfully.",
-            }
+            {"status": "error", "error": f"Local execution failed: {str(e)}"}
         )
 
 
@@ -178,27 +238,11 @@ def process_messages():
 
         # ------------------------------------------------------------------
         # DEBUG FLAG
-        # Set to True to log every raw event object as it hits the stream loop.
-        # Dumps the full attribute dict of every SDK event — extremely verbose
-        # but invaluable for discovering new event types and debugging the pipeline.
-        # HOW TO TURN OFF: set DEBUG_STREAM = False before deploying to production.
         # ------------------------------------------------------------------
         DEBUG_STREAM = True
 
         # ------------------------------------------------------------------
         # EVENT ROUTING REGISTRIES
-        #
-        # WEB_TOOL_NAMES   → tool_call_start / success events emit type:'web_status'
-        #                    Fields: { status, message }
-        #
-        # DELEGATION_TOOLS → delegation_mixin emits its own terminal research_status
-        #                    event, so we must NOT emit a second one here on success.
-        #
-        # Everything else  → emits type:'research_status'
-        #                    Fields: { state, activity }
-        #
-        # NEVER mix fields across types. web_status uses status+message.
-        # research_status uses state+activity. This is the contract.
         # ------------------------------------------------------------------
         WEB_TOOL_NAMES = {
             "perform_web_search",
@@ -230,9 +274,7 @@ def process_messages():
             logging_utility.info(f"[{run_id}] Starting unified event stream...")
 
             try:
-                for event in sync_stream.stream_events(
-                    model=selected_model
-                ):
+                for event in sync_stream.stream_events(model=selected_model):
                     event_type = type(event).__name__
 
                     if event_type not in [
@@ -244,9 +286,6 @@ def process_messages():
                             f"[{run_id}] ⚡ Event Received: {event_type}"
                         )
 
-                    # ── DEBUG: dump full event attrs for every event ──────────
-                    # Shows everything the SDK puts on each event object.
-                    # Disable by setting DEBUG_STREAM = False above.
                     if DEBUG_STREAM:
                         try:
                             logging_utility.info(
@@ -348,6 +387,8 @@ def process_messages():
                         logging_utility.info(
                             f"[{run_id}] 🛠️ Tool Request: {event.tool_name} | Args: {event.args}"
                         )
+
+                        # Yield standard tool call start
                         yield json.dumps(
                             {
                                 "type": "tool_call_start",
@@ -356,9 +397,27 @@ def process_messages():
                             }
                         ) + "\n"
 
+                        # --- NEW: Pre-execution notification for Network Tools ---
+                        # Because Netmiko SSH execution blocks, we emit an engineer status
+                        # to the frontend so it knows an SSH connection is being established.
+                        if event.tool_name == "execute_network_command":
+                            target_host = event.args.get("hostname", "unknown device")
+                            yield json.dumps(
+                                {
+                                    "type": "engineer_status",
+                                    "status": "in_progress",
+                                    "message": f"Establishing SSH session to {target_host} and executing commands...",
+                                    "tool": event.tool_name,
+                                    "run_id": run_id,
+                                }
+                            ) + "\n"
+
                         try:
                             start_time = time.time()
-                            success = event.execute(faux_tool_handler)
+
+                            # --- NEW: Dispatch execution to our secure master dispatcher ---
+                            success = event.execute(master_tool_dispatcher)
+
                             duration = time.time() - start_time
 
                             if success:
@@ -369,8 +428,19 @@ def process_messages():
                                 is_web_tool = event.tool_name in WEB_TOOL_NAMES
                                 is_delegation_tool = event.tool_name in DELEGATION_TOOLS
 
-                                if is_web_tool:
-                                    # web_status contract: status + message only.
+                                # --- NEW: Post-execution notification for Network Tools ---
+                                if event.tool_name == "execute_network_command":
+                                    yield json.dumps(
+                                        {
+                                            "type": "engineer_status",
+                                            "status": "completed",
+                                            "message": f"Network commands executed successfully in {duration:.2f}s.",
+                                            "tool": event.tool_name,
+                                            "run_id": run_id,
+                                        }
+                                    ) + "\n"
+
+                                elif is_web_tool:
                                     yield json.dumps(
                                         {
                                             "type": "web_status",
@@ -382,10 +452,6 @@ def process_messages():
                                     ) + "\n"
 
                                 elif not is_delegation_tool:
-                                    # research_status contract: state + activity only.
-                                    # Delegation tools emit their own terminal research_status
-                                    # event from within delegation_mixin — emitting here would
-                                    # double-fire and corrupt the activity feed.
                                     yield json.dumps(
                                         {
                                             "type": "research_status",
@@ -416,9 +482,7 @@ def process_messages():
                                 {"type": "error", "error": str(exec_err)}
                             ) + "\n"
 
-                    # G2. Scratchpad Event — dedicated SDK event type.
-                    # Forwarded to the frontend as type:'scratchpad_status'
-                    # so the ScratchpadStatus component can render operations and updates.
+                    # G2. Scratchpad Event
                     elif isinstance(event, ScratchpadEvent):
                         logging_utility.info(
                             f"[{run_id}] 📋 ScratchpadEvent: op={event.operation} | state={event.state} | activity={event.activity}"
@@ -436,9 +500,7 @@ def process_messages():
                             }
                         ) + "\n"
 
-                    # H. Research Status — delegation and orchestration activity.
-                    # Contract: { type, activity, tool, state, run_id }
-                    # Never contains status or message — those belong to web_status.
+                    # H. Research Status
                     elif isinstance(event, ResearchStatusEvent):
                         logging_utility.info(
                             f"[{run_id}] ℹ️ ResearchStatus: {event.activity} | Tool: {event.tool} ({event.state})"
@@ -453,9 +515,7 @@ def process_messages():
                             }
                         ) + "\n"
 
-                    # I. Web Status — web tool progress from web_search_mixin.
-                    # Contract: { type, status, message, tool, run_id }
-                    # Never contains state or activity — those belong to research_status.
+                    # I. Web Status
                     elif isinstance(event, WebStatusEvent):
                         yield json.dumps(
                             {
@@ -464,6 +524,22 @@ def process_messages():
                                 "run_id": event.run_id,
                                 "tool": event.tool,
                                 "message": event.message,
+                            }
+                        ) + "\n"
+
+                    # J. Engineer Status Event
+                    # Listens to network engineering tool updates (from SDK internals if any)
+                    elif isinstance(event, EngineerStatusEvent):
+                        logging_utility.info(
+                            f"[{run_id}] ⚙️ EngineerStatus: {event.message} | Tool: {event.tool} ({event.status})"
+                        )
+                        yield json.dumps(
+                            {
+                                "type": "engineer_status",
+                                "status": event.status,
+                                "message": event.message,
+                                "tool": event.tool,
+                                "run_id": getattr(event, "run_id", run_id),
                             }
                         ) + "\n"
 
