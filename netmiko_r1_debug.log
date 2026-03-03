@@ -1,0 +1,196 @@
+Connected to Dynamips VM "R1" (ID 1, type c7200) - Console port
+Press ENTER to get the prompt.
+00.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 06:57:17.707: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 06:58:17.711: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:00:28.519: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:01:28.519: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:03:37.099: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:04:37.107: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:06:47.675: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:07:47.675: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:09:54.447: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:10:54.455: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:13:05.543: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:14:05.547: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:16:12.419: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:17:12.419: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:19:20.123: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:20:20.127: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:22:30.963: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:23:30.971: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:25:39.079: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:26:39.087: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:28:48.183: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:29:48.203: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:32:00.367: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:33:00.387: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:35:10.599: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:36:10.619: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+R1#
+R1#exit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+R1 con0 is now available
+
+
+
+
+
+Press RETURN to get started.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+R1#
+R1#terminal width 511
+R1#terminal length 0
+R1#
+R1#
+R1#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+FastEthernet0/0        10.0.12.1       YES NVRAM  up                    up      
+FastEthernet1/0        192.168.1.22    YES NVRAM  up                    up      
+FastEthernet2/0        10.0.13.1       YES NVRAM  up                    up      
+Loopback0              192.168.100.1   YES NVRAM  up                    up      
+R1#
+R1#show ip ospf neighbor
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+192.168.100.3     1   FULL/BDR        00:00:32    10.0.13.2       FastEthernet2/0
+192.168.100.2     1   EXSTART/DR      00:00:39    10.0.12.2       FastEthernet0/0
+R1#
+R1#show ip route summary
+IP routing table name is default (0x0)
+IP routing table maximum-paths is 32
+Route Source    Networks    Subnets     Replicates  Overhead    Memory (bytes)
+connected       0           7           0           420         1260
+static          0           0           0           0           0
+ospf 1          0           3           0           180         552
+  Intra-area: 3 Inter-area: 0 External-1: 0 External-2: 0
+  NSSA External-1: 0 NSSA External-2: 0
+internal        3                                               1260
+Total           3           10          0           600         3072
+R1#
+R1#show logging | include OSPF|ADJCHG|DOWN|UP
+*Feb 26 05:57:56.807: %LINEPROTO-5-UPDOWN: Line protocol on Interface Loopback0, changed state to up
+*Feb 26 05:57:57.175: %LINK-3-UPDOWN: Interface FastEthernet0/0, changed state to up
+*Feb 26 05:57:57.191: %LINK-3-UPDOWN: Interface FastEthernet1/0, changed state to up
+*Feb 26 05:57:57.191: %LINK-3-UPDOWN: Interface FastEthernet2/0, changed state to up
+*Feb 26 05:57:58.175: %LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/0, changed state to up
+*Feb 26 05:57:58.191: %LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet1/0, changed state to up
+*Feb 26 05:57:58.199: %LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet2/0, changed state to up
+*Feb 26 06:42:38.463: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.3 on FastEthernet2/0 from LOADING to FULL, Loading Done
+*Feb 26 06:44:45.383: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 06:45:45.383: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 06:47:53.603: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 06:48:53.603: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 06:50:58.103: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 06:51:58.103: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 06:54:07.303: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 06:55:07.303: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 06:57:17.707: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 06:58:17.711: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:00:28.519: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:01:28.519: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:03:37.099: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:04:37.107: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:06:47.675: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:07:47.675: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:09:54.447: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:10:54.455: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:13:05.543: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:14:05.547: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:16:12.419: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:17:12.419: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:19:20.123: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:20:20.127: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:22:30.963: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:23:30.971: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:25:39.079: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:26:39.087: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:28:48.183: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:29:48.203: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:32:00.367: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:33:00.387: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:35:10.599: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:36:10.619: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:38:22.651: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:39:22.655: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:41:31.939: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:42:31.947: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:44:43.367: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:45:43.387: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+*Feb 26 07:47:52.587: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from EXSTART to DOWN, Neighbor Down: Too many retransmissions
+*Feb 26 07:48:52.595: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.100.2 on FastEthernet0/0 from DOWN to DOWN, Neighbor Down: Ignore timer expired
+R1#
+R1#exit

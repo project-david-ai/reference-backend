@@ -45,14 +45,15 @@ except Exception as e:
     )
     client = None
 
-
+import json
 # ------------------------------------------------------------------
 # 1.5. Local Tool Execution Environment (Network Handlers & Dispatcher)
 # ------------------------------------------------------------------
+import os
+import time
 
 # ------------------------------------------------------------------
 # GNS3 Lab Inventory — hostname → localhost telnet console mapping
-# Update ports to match your topology as it changes.
 # ------------------------------------------------------------------
 GNS3_INVENTORY = {
     "R1": {"host": "127.0.0.1", "port": 10000},
@@ -64,8 +65,6 @@ GNS3_INVENTORY = {
 def get_secure_device_credentials(hostname: str) -> dict:
     """
     Resolves connection parameters for a given hostname.
-    For GNS3 lab devices, maps logical names to localhost telnet console ports.
-    In production, this would query HashiCorp Vault, AWS Secrets Manager, etc.
     """
     logging_utility.info(f"🔒 [Auth] Resolving credentials for '{hostname}'...")
 
@@ -79,14 +78,20 @@ def get_secure_device_credentials(hostname: str) -> dict:
             "device_type": "cisco_ios_telnet",
             "host": lab_entry["host"],
             "port": lab_entry["port"],
-            "username": os.environ.get("NET_ADMIN_USER", "cisco"),
-            "password": os.environ.get("NET_ADMIN_PASS", "cisco"),
+            # 🛑 CRITICAL GNS3 FIX: Console ports don't usually prompt for auth.
+            # If your GNS3 routers just drop you into R1> without a login screen,
+            # passing a username/password causes Netmiko to time out waiting for "Username:".
+            "username": "",
+            "password": "",
+            # If your router has an 'enable secret cisco' set, keep this:
             "secret": os.environ.get("NET_ADMIN_PASS", "cisco"),
-            "global_delay_factor": 2,
-            "read_timeout_override": 30,
-            "session_log": "netmiko_gns3_debug.log",
+            # --- STABILITY TWEAKS FOR GNS3 EMULATORS ---
+            "global_delay_factor": 4,  # Emulators are slow
+            "timeout": 60,  # TCP socket timeout
+            "session_timeout": 60,  # General operation timeout
+            "fast_cli": False,  # Never use fast_cli on an emulator
+            "session_log": f"netmiko_{hostname.lower()}_debug.log",  # Prevents file lock crashes
         }
-
     # --- Production fallback: real IP via SSH ---
     logging_utility.warning(
         f"⚠️ [Auth] '{hostname}' not in GNS3 inventory. Falling back to SSH with env creds."
@@ -107,7 +112,7 @@ def get_secure_device_credentials(hostname: str) -> dict:
         "password": net_pass,
         "secret": net_pass,
         "global_delay_factor": 2,
-        "read_timeout_override": 30,
+        "timeout": 30,
     }
 
 
@@ -132,6 +137,16 @@ def master_tool_dispatcher(tool_name: str, arguments: dict) -> str:
     try:
         # --- NETWORK ENGINEERING TOOLS ---
         if tool_name == "execute_network_command":
+
+            # 🛡️ AI RESILIENCE FIX:
+            # If the Junior accidentally passes a string instead of a list, fix it silently.
+            cmds = arguments.get("commands", [])
+            if isinstance(cmds, str):
+                logging_utility.warning(
+                    "🩹 [Auto-Fix] Junior passed a string instead of a list. Wrapping in array."
+                )
+                arguments["commands"] = [cmds]
+
             return network_execution_handler("run_network_commands", arguments)
 
         # --- OTHER TOOLS ---
@@ -348,6 +363,10 @@ def process_messages():
 
                     # B2. Code Status
                     elif isinstance(event, CodeStatusEvent):
+                        logging_utility.info(
+                            f"[{run_id}] 🖥️ CodeStatus: {event.activity!r} | "
+                            f"state={event.state} | tool={event.tool}"
+                        )
                         yield json.dumps(
                             {
                                 "type": "code_status",
