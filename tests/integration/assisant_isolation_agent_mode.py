@@ -4,78 +4,145 @@ from config_orc_fc import config
 from dotenv import load_dotenv
 from projectdavid import Entity
 
-# ------------------------------------------------------------------
-# 0.  With first API key
-# ------------------------------------------------------------------
 load_dotenv()
 
-client = Entity(
-    base_url=os.getenv("BASE_URL", "http://localhost:9000"),
-    api_key="ea_Y4OIjjbHMluwjT0lcjGSRT-SsFjNt1oxi4YHcNp8vE4",
-)
-
-update_assistant = client.assistants.update_assistant(
-    assistant_id=config.get("assistant_id"),
-    agent_mode=False,
-    decision_telemetry=False,
-    web_access=False,
-    deep_research=False,
-    engineer=False,
-)
-
-#-----------------------------------------------------------
-# Create thread and run so I can retrieve user details
-#----------------------------------------------------
-
-thread = client.threads.create_thread()
-run = client.runs.create_run(thread_id=thread.id,
-                             assistant_id=config.get("assistant_id"),)
-
-
-print(f"The user ID is {run.user_id}")
-
-
-print(update_assistant.agent_mode)
-print(update_assistant.decision_telemetry)
-print(update_assistant.web_access)
-print(update_assistant.deep_research)
-print(update_assistant.id)
-print(update_assistant.engineer)
-
+ASSISTANT_ID = config.get("assistant_id")
 
 
 # ------------------------------------------------------------------
-# 0.  With second API key
+# 1.  With first API key  (owner — should succeed)
 # ------------------------------------------------------------------
-load_dotenv()
+print("\n--- Test 1: Owner API key ---")
+try:
+    client = Entity(
+        base_url=os.getenv("BASE_URL", "http://localhost:9000"),
+        api_key="ea_Y4OIjjbHMluwjT0lcjGSRT-SsFjNt1oxi4YHcNp8vE4",
+    )
 
-client = Entity(
-    base_url=os.getenv("BASE_URL", "http://localhost:9000"),
-    api_key="ea_T1CphyVjo2ahhnWrVsGyYh03tbguKac7gPc4Dz8C66k",
-)
+    update_assistant = client.assistants.update_assistant(
+        assistant_id=ASSISTANT_ID,
+        agent_mode=False,
+        decision_telemetry=False,
+        web_access=False,
+        deep_research=False,
+        engineer=False,
+    )
 
-update_assistant = client.assistants.update_assistant(
-    assistant_id=config.get("assistant_id"),
-    agent_mode=False,
-    decision_telemetry=False,
-    web_access=False,
-    deep_research=False,
-    engineer=False,
-)
+    thread = client.threads.create_thread()
+    run = client.runs.create_run(thread_id=thread.id, assistant_id=ASSISTANT_ID)
 
-#-----------------------------------------------------------
-# Create thread and run so I can retrieve user details
-#----------------------------------------------------
+    print(f"User ID      : {run.user_id}")
+    print(f"agent_mode   : {update_assistant.agent_mode}")
+    print(f"telemetry    : {update_assistant.decision_telemetry}")
+    print(f"web_access   : {update_assistant.web_access}")
+    print(f"deep_research: {update_assistant.deep_research}")
+    print(f"assistant_id : {update_assistant.id}")
+    print(f"engineer     : {update_assistant.engineer}")
 
-thread = client.threads.create_thread()
-run = client.runs.create_run(thread_id=thread.id,
-                             assistant_id=config.get("assistant_id"),)
+except Exception as e:
+    print(f"[FAILED] Test 1 raised an unexpected error: {e}")
 
 
-print(f"The user ID is {run.user_id}")
-print(update_assistant.agent_mode)
-print(update_assistant.decision_telemetry)
-print(update_assistant.web_access)
-print(update_assistant.deep_research)
-print(update_assistant.id)
-print(update_assistant.engineer)
+# ------------------------------------------------------------------
+# 2.  With second API key  (non-owner — should be rejected with 403)
+# ------------------------------------------------------------------
+print("\n--- Test 2: Non-owner API key (expecting 403) ---")
+try:
+    client = Entity(
+        base_url=os.getenv("BASE_URL", "http://localhost:9000"),
+        api_key="ea_T1CphyVjo2ahhnWrVsGyYh03tbguKac7gPc4Dz8C66k",
+    )
+
+    update_assistant = client.assistants.update_assistant(
+        assistant_id=ASSISTANT_ID,
+        agent_mode=False,
+        decision_telemetry=False,
+        web_access=False,
+        deep_research=False,
+        engineer=False,
+    )
+
+    # If we reach here the ownership guard is NOT working — flag it loudly.
+    thread = client.threads.create_thread()
+    run = client.runs.create_run(thread_id=thread.id, assistant_id=ASSISTANT_ID)
+
+    print(f"User ID      : {run.user_id}")
+    print(f"agent_mode   : {update_assistant.agent_mode}")
+    print(f"telemetry    : {update_assistant.decision_telemetry}")
+    print(f"web_access   : {update_assistant.web_access}")
+    print(f"deep_research: {update_assistant.deep_research}")
+    print(f"assistant_id : {update_assistant.id}")
+    print(f"engineer     : {update_assistant.engineer}")
+    print("\n[WARNING] Test 2 succeeded — ownership guard may not be active yet.")
+
+except Exception as e:
+    print(f"[EXPECTED] Test 2 was rejected: {e}")
+
+
+
+print("\n--- Test 3: Creating a new assistant---")
+try:
+    client = Entity(
+        base_url=os.getenv("BASE_URL", "http://localhost:9000"),
+        api_key="ea_Y4OIjjbHMluwjT0lcjGSRT-SsFjNt1oxi4YHcNp8vE4",
+    )
+
+    # -------------------------------------------
+    # create_assistant
+    # --------------------------------------------
+    assistant = client.assistants.create_assistant(
+        name="Test Assistant",
+        model="gpt-oss-120b",
+        instructions="You are a helpful AI assistant, your name is Nexa.",
+        tools=[
+
+            {"type": "code_interpreter"},
+            {"type": "computer"},
+            {"type": "file_search"},
+            {"type": "web_search"},
+
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_flight_times",
+                    "description": "Get flight times",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "departure": {"type": "string"},
+                            "arrival": {"type": "string"},
+                        },
+                        "required": ["departure", "arrival"],
+                    },
+                },
+            },
+        ],
+    )
+
+    print(assistant.id)
+    print(assistant.instructions)
+
+    update_assistant = client.assistants.update_assistant(
+        assistant_id=assistant.id,
+        agent_mode=False,
+        decision_telemetry=False,
+        web_access=False,
+        deep_research=False,
+        engineer=False,
+    )
+
+    # If we reach here the ownership guard is NOT working — flag it loudly.
+    thread = client.threads.create_thread()
+    run = client.runs.create_run(thread_id=thread.id, assistant_id=ASSISTANT_ID)
+
+    print(f"User ID      : {run.user_id}")
+    print(f"agent_mode   : {update_assistant.agent_mode}")
+    print(f"telemetry    : {update_assistant.decision_telemetry}")
+    print(f"web_access   : {update_assistant.web_access}")
+    print(f"deep_research: {update_assistant.deep_research}")
+    print(f"assistant_id : {update_assistant.id}")
+    print(f"engineer     : {update_assistant.engineer}")
+    print("\n[WARNING] Test 3 succeeded — ownership working for new assistant.")
+
+except Exception as e:
+    print(f"[EXPECTED] Test 3 was rejected: {e}")

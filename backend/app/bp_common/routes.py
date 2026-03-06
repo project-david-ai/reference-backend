@@ -129,7 +129,7 @@ def update_deep_research():
         # 2. Handle Assistant ID
         # FIXME: Hardcoded for now per your request.
         # When ready to fix frontend, remove this line and use data.get("assistant_id")
-        assistant_id = "asst_13HyDgBnZxVwh5XexYu74F"
+        assistant_id = "asst_yRohmbZfAyflp03AMfdu4B"
 
         # --- Future proofing: Logic to handle dynamic ID if/when you remove the hardcode ---
         # incoming_id = data.get("assistant_id")
@@ -218,7 +218,7 @@ def update_web_access():
         # 2. Handle Assistant ID
         # FIXME: Hardcoded for now per your request.
         # When ready to fix frontend, remove this line and use data.get("assistant_id")
-        assistant_id = "asst_13HyDgBnZxVwh5XexYu74F"
+        assistant_id = "asst_yRohmbZfAyflp03AMfdu4B"
 
         # --- Future proofing: Logic to handle dynamic ID if/when you remove the hardcode ---
         # incoming_id = data.get("assistant_id")

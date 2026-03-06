@@ -254,7 +254,7 @@ def process_messages():
         messages = data.get("messages", [])
         user_id = data.get("userId") or data.get("user_id")
         thread_id = data.get("threadId") or data.get("thread_id")
-        assistant_id = data.get("assistantId", "asst_13HyDgBnZxVwh5XexYu74F")
+        assistant_id = data.get("assistantId", "asst_yRohmbZfAyflp03AMfdu4B")
 
         selected_model = data.get("model") or "hyperbolic/deepseek-ai/DeepSeek-V3-0324"
         hyperbolic_api_key = data.get("apiKey") or os.getenv("HYPERBOLIC_API_KEY")
