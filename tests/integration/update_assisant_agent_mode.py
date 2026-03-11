@@ -23,13 +23,15 @@ update_assistant = client.assistants.update_assistant(
     engineer=False,
 )
 
-#-----------------------------------------------------------
+# -----------------------------------------------------------
 # Create thread and run so I can retrieve user details
-#----------------------------------------------------
+# ----------------------------------------------------
 
 thread = client.threads.create_thread()
-run = client.runs.create_run(thread_id=thread.id,
-                             assistant_id=config.get("assistant_id"),)
+run = client.runs.create_run(
+    thread_id=thread.id,
+    assistant_id=config.get("assistant_id"),
+)
 
 
 print(f"The user ID is {run.user_id}")
@@ -41,7 +43,6 @@ print(update_assistant.web_access)
 print(update_assistant.deep_research)
 print(update_assistant.id)
 print(update_assistant.engineer)
-
 
 
 # ------------------------------------------------------------------
@@ -63,13 +64,15 @@ update_assistant = client.assistants.update_assistant(
     engineer=False,
 )
 
-#-----------------------------------------------------------
+# -----------------------------------------------------------
 # Create thread and run so I can retrieve user details
-#----------------------------------------------------
+# ----------------------------------------------------
 
 thread = client.threads.create_thread()
-run = client.runs.create_run(thread_id=thread.id,
-                             assistant_id=config.get("assistant_id"),)
+run = client.runs.create_run(
+    thread_id=thread.id,
+    assistant_id=config.get("assistant_id"),
+)
 
 
 print(f"The user ID is {run.user_id}")

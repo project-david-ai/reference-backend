@@ -14,11 +14,11 @@ from projectdavid import (CodeExecutionGeneratedFileEvent,
                           ComputerExecutionOutputEvent, ContentEvent, Entity,
                           HotCodeEvent, ReasoningEvent, ToolCallRequestEvent,
                           WebStatusEvent)
-from projectdavid.events import (CodeStatusEvent, EngineerStatusEvent,
-                                 ResearchStatusEvent, ScratchpadEvent,
+from projectdavid.events import (CodeStatusEvent, ComputerGeneratedFileEvent,
+                                 EngineerStatusEvent, ResearchStatusEvent,
+                                 ScratchpadEvent, ShellStatusEvent,
                                  ToolInterceptEvent)
 # --- Utilities ---
-from projectdavid.utils.network_device_handler import NetworkDeviceHandler
 from projectdavid_common import UtilsInterface
 
 # Assuming this is part of a Blueprint
@@ -116,12 +116,6 @@ def get_secure_device_credentials(hostname: str) -> dict:
     }
 
 
-# Initialize the Curated Network Handler AFTER defining the resolution logic
-network_execution_handler = NetworkDeviceHandler(
-    credential_provider_callback=get_secure_device_credentials
-)
-
-
 # ------------------------------------------------------------------
 # 1.6 Tool Dispatcher
 # ------------------------------------------------------------------
@@ -135,22 +129,9 @@ def master_tool_dispatcher(tool_name: str, arguments: dict) -> str:
     )
 
     try:
-        # --- NETWORK ENGINEERING TOOLS ---
-        if tool_name == "execute_network_command":
-
-            # 🛡️ AI RESILIENCE FIX:
-            # If the Junior accidentally passes a string instead of a list, fix it silently.
-            cmds = arguments.get("commands", [])
-            if isinstance(cmds, str):
-                logging_utility.warning(
-                    "🩹 [Auto-Fix] Junior passed a string instead of a list. Wrapping in array."
-                )
-                arguments["commands"] = [cmds]
-
-            return network_execution_handler("run_network_commands", arguments)
 
         # --- OTHER TOOLS ---
-        elif tool_name == "get_flight_times":
+        if tool_name == "get_flight_times":
             time.sleep(1)
             departure = arguments.get("departure", "Unknown")
             arrival = arguments.get("arrival", "Unknown")
@@ -305,6 +286,8 @@ def process_messages():
         # ------------------------------------------------------------------
         # Define the Generator (Unified Single Loop)
         # ------------------------------------------------------------------
+        logging_utility.info(f"Sending message with assistant ID: {assistant_id}")
+
         def generate_events_stream():
             sync_stream = client.synchronous_inference_stream
 
@@ -377,6 +360,25 @@ def process_messages():
                             }
                         ) + "\n"
 
+                    # B3. Shell Status
+                    # Mirrors B2 exactly — same fields, different type discriminator
+                    # so the frontend can route shell lifecycle events independently
+                    # of code interpreter lifecycle events.
+                    elif isinstance(event, ShellStatusEvent):
+                        logging_utility.info(
+                            f"[{run_id}] 🐚 ShellStatus: {event.activity!r} | "
+                            f"state={event.state} | tool={event.tool}"
+                        )
+                        yield json.dumps(
+                            {
+                                "type": "shell_status",
+                                "activity": event.activity,
+                                "state": event.state,
+                                "tool": event.tool,
+                                "run_id": event.run_id,
+                            }
+                        ) + "\n"
+
                     # C. Hot Code
                     elif isinstance(event, HotCodeEvent):
                         yield json.dumps(
@@ -400,7 +402,7 @@ def process_messages():
                             }
                         ) + "\n"
 
-                    # E. Computer/Shell Output
+                    # E. Computer/Shell PTY Output
                     elif isinstance(event, ComputerExecutionOutputEvent):
                         yield json.dumps(
                             {
@@ -410,12 +412,12 @@ def process_messages():
                             }
                         ) + "\n"
 
-                    # F. Generated Files
+                    # F. Code Interpreter Generated Files
                     elif isinstance(event, CodeExecutionGeneratedFileEvent):
                         logging_utility.info(
                             f"[{run_id}] 📎 FILE GENERATED EVENT DETECTED:\n"
                             f"   - Filename: {event.filename}\n"
-                            f"   - File ID: {event.file_id}\n"
+                            f"   - File ID:  {event.file_id}\n"
                             f"   - URL Present: {bool(event.url)}\n"
                             f"   - URL: {event.url}"
                         )
@@ -427,6 +429,32 @@ def process_messages():
                                 "mime_type": event.mime_type,
                                 "url": event.url,
                                 "base64": event.base64_data,
+                                "run_id": event.run_id,
+                            }
+                        ) + "\n"
+
+                    # F2. Computer Shell Generated Files
+                    # Mirrors F exactly — same fields + context (harvest trigger).
+                    # Frontend uses "computer_file" type to distinguish from
+                    # "code_interpreter_file" and can render session/context info.
+                    elif isinstance(event, ComputerGeneratedFileEvent):
+                        logging_utility.info(
+                            f"[{run_id}] 💾 COMPUTER FILE EVENT DETECTED:\n"
+                            f"   - Filename: {event.filename}\n"
+                            f"   - File ID:  {event.file_id}\n"
+                            f"   - Context:  {event.context}\n"
+                            f"   - URL Present: {bool(event.url)}\n"
+                            f"   - URL: {event.url}"
+                        )
+                        yield json.dumps(
+                            {
+                                "type": "computer_file",
+                                "filename": event.filename,
+                                "file_id": event.file_id,
+                                "mime_type": event.mime_type,
+                                "url": event.url,
+                                "base64": event.base64_data,
+                                "context": event.context,
                                 "run_id": event.run_id,
                             }
                         ) + "\n"
@@ -526,7 +554,8 @@ def process_messages():
                     # G2. Scratchpad Event
                     elif isinstance(event, ScratchpadEvent):
                         logging_utility.info(
-                            f"[{run_id}] 📋 ScratchpadEvent: op={event.operation} | state={event.state} | activity={event.activity}"
+                            f"[{run_id}] 📋 ScratchpadEvent: op={event.operation} | "
+                            f"state={event.state} | activity={event.activity}"
                         )
                         yield json.dumps(
                             {
@@ -544,7 +573,8 @@ def process_messages():
                     # H. Research Status
                     elif isinstance(event, ResearchStatusEvent):
                         logging_utility.info(
-                            f"[{run_id}] ℹ️ ResearchStatus: {event.activity} | Tool: {event.tool} ({event.state})"
+                            f"[{run_id}] ℹ️ ResearchStatus: {event.activity} | "
+                            f"Tool: {event.tool} ({event.state})"
                         )
                         yield json.dumps(
                             {
@@ -568,10 +598,11 @@ def process_messages():
                             }
                         ) + "\n"
 
-                    # J. Engineer Status Event
+                    # J. Engineer Status
                     elif isinstance(event, EngineerStatusEvent):
                         logging_utility.info(
-                            f"[{run_id}] ⚙️ EngineerStatus: {event.activity} | Tool: {event.tool} ({event.state})"
+                            f"[{run_id}] ⚙️ EngineerStatus: {event.activity} | "
+                            f"Tool: {event.tool} ({event.state})"
                         )
                         yield json.dumps(
                             {
@@ -584,11 +615,10 @@ def process_messages():
                         ) + "\n"
 
                     # K. Tool Intercept Event
-                    # Emitted when the delegation handler intercepts a Junior's tool call.
-                    # Mirrors section G but uses execute_intercepted, scoped to the worker's thread.
                     elif isinstance(event, ToolInterceptEvent):
                         logging_utility.info(
-                            f"[{run_id}] 🔧 ToolIntercept: tool={event.tool_name} | origin={event.origin} | thread={event.thread_id} | args={event.args}"
+                            f"[{run_id}] 🔧 ToolIntercept: tool={event.tool_name} | "
+                            f"origin={event.origin} | thread={event.thread_id} | args={event.args}"
                         )
 
                         yield json.dumps(
@@ -627,7 +657,8 @@ def process_messages():
 
                             if success:
                                 logging_utility.info(
-                                    f"[{run_id}] ✅ Intercepted tool '{event.tool_name}' executed in {duration:.2f}s."
+                                    f"[{run_id}] ✅ Intercepted tool '{event.tool_name}' "
+                                    f"executed in {duration:.2f}s."
                                 )
 
                                 if event.tool_name == "execute_network_command":
